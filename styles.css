@@ -1,0 +1,182 @@
+body {
+    font-family: 'Inter', sans-serif;
+    margin:0; 
+    background-color: #e2e8f0;
+    min-height: 100vh; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+}
+/* Login card styles */
+.login-card {
+    background-color: white;
+    padding: 2.5rem;
+    border-radius: 1.5rem;
+    box-shadow:
+        0 10px 15px -3px rgba(0,0,0,0.1),
+        0 4px 6px -2px rgba(0,0,0,0.05);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    background-image: linear-gradient(
+        to bottom right,
+        rgba(255,255,255,0.9),
+        rgba(255,255,255,0.6)
+    );
+    border: 1px solid rgba(255,255,255,0.2);
+}
+.input-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+.input-group input {
+    width: 100%;
+    padding-left: 2.5rem;
+    padding-right: 1rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    outline-offset: 2px;
+    transition: border-color 0.2s;
+}
+.input-group input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.3);
+}
+.input-group .icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    pointer-events: none;
+}
+button {
+    width: 100%;
+    background-color: #3b82f6;
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    font-size: 1.125rem;
+    transition: background-color 0.2s;
+    border: none;
+}
+button:hover {
+    background-color: #2563eb;
+}
+.error-message {
+    color: #dc2626;
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+/* Main page container */
+#mainPage {
+    display: none; /* Hidden by default, shown via JS */
+    width: 900px;
+    height: 600px;
+    background: #fff;
+    border-radius: 2rem;
+    box-shadow:
+        0 20px 25px -5px rgba(0,0,0,0.1),
+        0 10px 10px -5px rgba(0,0,0,0.04);
+    /* display: flex; is applied via JS after successful login */
+    flex-direction: column;
+}
+
+/* Header bar */
+#mainHeader {
+    background: #3b82f6;
+    color: white;
+    padding: 1rem 2rem;
+    font-weight: 700;
+    font-size: 1.5rem;
+    border-top-left-radius: 2rem;
+    border-top-right-radius: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#mainContent {
+    flex: 1;
+    display: flex;
+    padding: 1rem;
+    gap: 1rem;
+}
+
+/* Left squares stacked vertically */
+#leftSquares {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.square {
+    flex: 1;
+    background: #e0e7ff;
+    border-radius: 1rem;
+    box-shadow:
+        0 5px 10px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+    font-size: 1.5rem;
+    user-select: none;
+}
+
+/* Circle area */
+#circleArea {
+    flex: 3;
+    background: #c7d2fe;
+    border-radius: 9999px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    font-weight: 700;
+    font-size: 2rem;
+    box-shadow:
+        0 10px 20px rgba(0,0,0,0.1);
+    user-select: none;
+}
+
+/* ON/OFF text centered inside circle */
+#onOffText {
+    position: absolute;
+    color: #3730a3;
+    user-select: none;
+}
+
+/* Sidebar on right */
+#sidebar {
+    width: 70px;
+    background: #e0e7ff;
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem 0;
+}
+#sidebar button {
+    background: transparent;
+    border: none;
+    font-size: 1.8rem;
+    color: #3b82f6;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    /* Overrides the global button width */
+    width: auto; 
+    padding: 0;
+}
+#sidebar button:hover {
+    color: #2563eb;
+}

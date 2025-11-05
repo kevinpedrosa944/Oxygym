@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Login with Main Page</title>
+    <link rel="stylesheet" href="styles.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<div class="login-card p-10 rounded-3xl shadow-lg w-full max-w-sm" id="loginCard">
+    <h1 class="text-3xl font-bold mb-2">Welcome To OXYGYM</h1>
+    <p class="text-sm text-gray-500 mb-8">Login to your account</p>
+    <form id="loginForm" novalidate>
+        <div id="error" class="error-message" style="display:none;"></div>
+        <div class="input-group">
+            <i class="fas fa-user icon"></i>
+            <input type="text" id="username" placeholder="Username" required />
+        </div>
+        <div class="input-group">
+            <i class="fas fa-lock icon"></i>
+            <input type="password" id="password" placeholder="Password" required />
+        </div>
+        <button type="submit">Login</button>
+    </form>
+</div>
+
+<div id="mainPage" aria-label="Main Page Layout">
+    <header id="mainHeader" aria-label="Main Page Header">
+        Main Page
+        <button class="logout-btn" aria-label="Logout Button" onclick="logout()">Logout</button>
+    </header>
+    <div id="mainContent">
+        <section id="leftSquares" aria-label="Squares Section">
+            <div class="square">Square 1</div>
+            <div class="square">Square 2</div>
+        </section>
+        <section id="circleArea" aria-label="Circle Area">
+            <div id="onOffText">ON/OFF</div>
+        </section>
+        <nav id="sidebar" aria-label="Sidebar Navigation">
+            <button title="Sidebar Button 1"><i class="fas fa-home"></i></button>
+            <button title="Sidebar Button 2"><i class="fas fa-cog"></i></button>
+            <button title="Sidebar Button 3"><i class="fas fa-info-circle"></i></button>
+        </nav>
+    </div>
+</div>
+
+<script>
+    const loginForm = document.getElementById('loginForm');
+    const errorDiv = document.getElementById('error');
+    const loginCard = document.getElementById('loginCard');
+    const mainPage = document.getElementById('mainPage');
+
+    loginForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        if (username === 'admin' && password === '12345') {
+            errorDiv.style.display = 'none';
+            loginCard.style.display = 'none';
+            mainPage.style.display = 'flex'; // Use flex to show the main page
+        } else {
+            errorDiv.textContent = 'Invalid username or password.';
+            errorDiv.style.display = 'block';
+        }
+    });
+
+    function logout() {
+        mainPage.style.display = 'none';
+        loginCard.style.display = 'block'; // Use block to show the login card
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+        errorDiv.style.display = 'none';
+    }
+</script>
+
+</body>
+</html>
