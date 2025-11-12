@@ -72,24 +72,26 @@
             padding: 0.75rem;
             border-radius: 0.75rem;
             font-size: 1.125rem;
+            border: none;
+            cursor: pointer;
             transition: background-color 0.2s;
         }
         button:hover {
             background-color: #2563eb;
         }
         .error-message {
-            color: #dc2626; /* red-600 */
+            color: #dc2626;
             margin-bottom: 1rem;
             font-weight: 500;
+            min-height: 1.5rem;
         }
     </style>
 </head>
 <body>
-    <div class="login-card p-10 rounded-3xl shadow-lg w-full max-w-sm">
+    <div class="login-card">
         <h1 class="text-3xl font-bold mb-2">Welcome Back</h1>
         <p class="text-sm text-gray-500 mb-8">Login to your account</p>
         <form id="loginForm" novalidate>
-            <div id="error" class="error-message" style="display:none;"></div>
             <div class="input-group">
                 <i class="fas fa-user icon"></i>
                 <input type="text" id="username" placeholder="Username" required />
@@ -98,38 +100,43 @@
                 <i class="fas fa-lock icon"></i>
                 <input type="password" id="password" placeholder="Password" required />
             </div>
+            <div id="error" class="error-message"></div>
             <button type="submit">Login</button>
         </form>
     </div>
 
-   <script>
-    const loginForm = document.getElementById('loginForm');
-    const errorDiv = document.getElementById('error');
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const errorDiv = document.getElementById('error');
 
-    loginForm.addEventListener('submit', async function(event) {
-        event.preventDefault();
-
-        const username = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value;
-
-        const response = await fetch('login.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
+        loginForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            errorDiv.textContent = '';
+            
+            try {
+                const response = await fetch('http://localhost/Oxygym/Login.php', { /* changed URL to localhost for testing */
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.status === 'success') {
+                    alert(data.message);
+                    loginForm.reset();
+                    window.location.href = 'index.html';
+                } else {
+                    errorDiv.textContent = data.message || 'Login failed.';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Error: ' + error.message;
+            }
         });
-
-        const result = await response.json();
-
-        if (result.status === 'success') {
-            errorDiv.style.display = 'none';
-            alert(result.message);
-           
-        } else {
-            errorDiv.textContent = result.message;
-            errorDiv.style.display = 'block';
-        }
-    });
-</script>
+    </script>
 </body>
 </html>
 
