@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Login</title>
+    <title>Login / Sign Up</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -18,7 +18,7 @@
             align-items: center;
             min-height: 100vh;
         }
-        .login-card {
+        .auth-card {
             background-color: white;
             padding: 2.5rem;
             border-radius: 2rem;
@@ -34,6 +34,30 @@
                 rgba(255, 255, 255, 0.6)
             );
             border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .tabs {
+            display: none;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 0.75rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #9ca3af;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
         }
         .input-group {
             position: relative;
@@ -64,7 +88,7 @@
             color: #9ca3af;
             pointer-events: none;
         }
-        button {
+        button[type="submit"] {
             width: 100%;
             background-color: #3b82f6;
             color: white;
@@ -72,64 +96,175 @@
             padding: 0.75rem;
             border-radius: 0.75rem;
             font-size: 1.125rem;
+            border: none;
+            cursor: pointer;
             transition: background-color 0.2s;
         }
-        button:hover {
+        button[type="submit"]:hover {
             background-color: #2563eb;
         }
         .error-message {
-            color: #dc2626; /* red-600 */
+            color: #dc2626;
             margin-bottom: 1rem;
             font-weight: 500;
+            min-height: 1.5rem;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .back-link a {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .back-link a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <div class="login-card p-10 rounded-3xl shadow-lg w-full max-w-sm">
-        <h1 class="text-3xl font-bold mb-2">Welcome Back</h1>
-        <p class="text-sm text-gray-500 mb-8">Login to your account</p>
-        <form id="loginForm" novalidate>
-            <div id="error" class="error-message" style="display:none;"></div>
-            <div class="input-group">
-                <i class="fas fa-user icon"></i>
-                <input type="text" id="username" placeholder="Username" required />
-            </div>
-            <div class="input-group">
-                <i class="fas fa-lock icon"></i>
-                <input type="password" id="password" placeholder="Password" required />
-            </div>
-            <button type="submit">Login</button>
-        </form>
+    <div class="auth-card">
+        <div class="tabs">
+        </div>
+
+        <!-- LOGIN TAB -->
+        <div id="login" class="tab-content active">
+            <h1 class="text-3xl font-bold mb-2">Welcome Back</h1>
+            <p class="text-sm text-gray-500 mb-8">Login to your account</p>
+            <form id="loginForm" novalidate>
+                <div class="input-group">
+                    <i class="fas fa-user icon"></i>
+                    <input type="text" id="username" placeholder="Username" required />
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock icon"></i>
+                    <input type="password" id="password" placeholder="Password" required />
+                </div>
+                <p class="text-sm text-gray-600 mb-4 text-left">
+                    Don't have an account yet? <a href="#signup" class="text-blue-500 font-semibold cursor-pointer" onclick="switchTab('signup')">Sign Up</a>
+                </p>
+                <div id="loginError" class="error-message"></div>
+                <button type="submit">Login</button>
+            </form>
+        </div>
+
+        <!-- SIGN UP TAB -->
+        <div id="signup" class="tab-content">
+            <h1 class="text-3xl font-bold mb-2">Create Account</h1>
+            <p class="text-sm text-gray-500 mb-8">Join OxyGym today</p>
+            <form id="signupForm" novalidate>
+                <div class="input-group">
+                    <i class="fas fa-user icon"></i>
+                    <input type="text" id="signupFirstName" placeholder="First Name" required />
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-user icon"></i>
+                    <input type="text" id="signupLastName" placeholder="Last Name" required />
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-envelope icon"></i>
+                    <input type="email" id="signupEmail" placeholder="Email" required />
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock icon"></i>
+                    <input type="password" id="signupPassword" placeholder="Password" required />
+                </div>
+                <div id="signupError" class="error-message"></div>
+                <button type="submit">Sign Up</button>
+            </form>
+        </div>
+
+        <div class="back-link">
+            <a href="index.html">← Back to Home</a>
+        </div>
     </div>
 
-   <script>
-    const loginForm = document.getElementById('loginForm');
-    const errorDiv = document.getElementById('error');
+    <script>
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+        }
 
-    loginForm.addEventListener('submit', async function(event) {
-        event.preventDefault();
-
-        const username = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value;
-
-        const response = await fetch('login.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tabName = this.dataset.tab;
+                switchTab(tabName);
+            });
         });
 
-        const result = await response.json();
+        // Login form
+        const loginForm = document.getElementById('loginForm');
+        const loginError = document.getElementById('loginError');
 
-        if (result.status === 'success') {
-            errorDiv.style.display = 'none';
-            alert(result.message);
-           
-        } else {
-            errorDiv.textContent = result.message;
-            errorDiv.style.display = 'block';
-        }
-    });
-</script>
+        loginForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            loginError.textContent = '';
+            
+            try {
+                const response = await fetch('http://localhost/Oxygym/Login.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.status === 'success') {
+                    alert(data.message);
+                    loginForm.reset();
+                    window.location.href = 'index.html';
+                } else {
+                    loginError.textContent = data.message || 'Login failed.';
+                }
+            } catch (error) {
+                loginError.textContent = 'Error: ' + error.message;
+            }
+        });
+
+        // Sign up form
+        const signupForm = document.getElementById('signupForm');
+        const signupError = document.getElementById('signupError');
+
+        signupForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const firstName = document.getElementById('signupFirstName').value.trim();
+            const lastName = document.getElementById('signupLastName').value.trim();
+            const email = document.getElementById('signupEmail').value.trim();
+            const password = document.getElementById('signupPassword').value;
+            
+            signupError.textContent = '';
+            
+            if (!firstName || !lastName || !email || !password) {
+                signupError.textContent = 'All fields are required.';
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost/Oxygym/Register.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ firstName, lastName, email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.status === 'success') {
+                    alert(data.message);
+                    signupForm.reset();
+                    window.location.href = 'index.html';
+                } else {
+                    signupError.textContent = data.message || 'Sign up failed.';
+                }
+            } catch (error) {
+                signupError.textContent = 'Error: ' + error.message;
+            }
+        });
+    </script>
 </body>
 </html>
 
