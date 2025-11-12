@@ -35,30 +35,8 @@
             );
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        .tabs {
-            display: none;
-        }
-        .tab-btn {
-            flex: 1;
-            padding: 0.75rem;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            color: #9ca3af;
-            border-bottom: 3px solid transparent;
-            transition: all 0.2s;
-        }
-        .tab-btn.active {
-            color: #3b82f6;
-            border-bottom-color: #3b82f6;
-        }
-        .tab-content {
-            display: none;
-        }
-        .tab-content.active {
-            display: block;
-        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
         .input-group {
             position: relative;
             margin-bottom: 1.5rem;
@@ -78,7 +56,7 @@
         }
         .input-group input:focus {
             border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
         }
         .input-group .icon {
             position: absolute;
@@ -100,35 +78,24 @@
             cursor: pointer;
             transition: background-color 0.2s;
         }
-        button[type="submit"]:hover {
-            background-color: #2563eb;
-        }
+        button[type="submit"]:hover { background-color: #2563eb; }
         .error-message {
             color: #dc2626;
             margin-bottom: 1rem;
             font-weight: 500;
             min-height: 1.5rem;
+            text-align: left;
         }
-        .back-link {
-            text-align: center;
-            margin-top: 1rem;
-        }
-        .back-link a {
-            color: #3b82f6;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        .back-link a:hover {
-            text-decoration: underline;
-        }
+        .back-link { text-align: center; margin-top: 1rem; }
+        .back-link a { color: #3b82f6; text-decoration: none; font-weight: 500; }
+        .back-link a:hover { text-decoration: underline; }
+        .small-link { font-size: 0.9rem; color: #374151; }
+        .small-link a { color: #3b82f6; font-weight: 600; text-decoration: none; }
     </style>
 </head>
 <body>
     <div class="auth-card">
-        <div class="tabs">
-        </div>
-
-        <!-- LOGIN TAB -->
+        <!-- LOGIN VIEW (default) -->
         <div id="login" class="tab-content active">
             <h1 class="text-3xl font-bold mb-2">Welcome Back</h1>
             <p class="text-sm text-gray-500 mb-8">Login to your account</p>
@@ -141,15 +108,15 @@
                     <i class="fas fa-lock icon"></i>
                     <input type="password" id="password" placeholder="Password" required />
                 </div>
-                <p class="text-sm text-gray-600 mb-4 text-left">
-                    Don't have an account yet? <a href="#signup" class="text-blue-500 font-semibold cursor-pointer" onclick="switchTab('signup')">Sign Up</a>
+                <p class="small-link text-left" style="margin-bottom:10px;">
+                    Don't have an account yet? <a href="#" id="showSignup">Sign up</a>
                 </p>
                 <div id="loginError" class="error-message"></div>
                 <button type="submit">Login</button>
             </form>
         </div>
 
-        <!-- SIGN UP TAB -->
+        <!-- SIGNUP VIEW (hidden by default) -->
         <div id="signup" class="tab-content">
             <h1 class="text-3xl font-bold mb-2">Create Account</h1>
             <p class="text-sm text-gray-500 mb-8">Join OxyGym today</p>
@@ -181,89 +148,84 @@
     </div>
 
     <script>
-        // Tab switching
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById(tabName).classList.add('active');
+        // toggle views (no tab buttons required)
+        function showView(id) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            const el = document.getElementById(id);
+            if (el) el.classList.add('active');
         }
+        document.getElementById('showSignup').addEventListener('click', function(e) {
+            e.preventDefault();
+            showView('signup');
+        });
 
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const tabName = this.dataset.tab;
-                switchTab(tabName);
+        // Login submit
+        (function() {
+            const loginForm = document.getElementById('loginForm');
+            const loginError = document.getElementById('loginError');
+            if (!loginForm) return;
+            loginForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value;
+                loginError.textContent = '';
+                if (!username || !password) {
+                    loginError.textContent = 'Username and password are required.';
+                    return;
+                }
+                try {
+                    const res = await fetch('Login.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.status === 'success') {
+                        alert(data.message || 'Logged in');
+                        window.location.href = 'index.html';
+                    } else {
+                        loginError.textContent = data.message || 'Login failed.';
+                    }
+                } catch (err) {
+                    loginError.textContent = 'Network error.';
+                }
             });
-        });
+        })();
 
-        // Login form
-        const loginForm = document.getElementById('loginForm');
-        const loginError = document.getElementById('loginError');
-
-        loginForm.addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
-            
-            loginError.textContent = '';
-            
-            try {
-                const response = await fetch('http://localhost/Oxygym/Login.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok && data.status === 'success') {
-                    alert(data.message);
-                    loginForm.reset();
-                    window.location.href = 'index.html';
-                } else {
-                    loginError.textContent = data.message || 'Login failed.';
+        // Signup submit
+        (function() {
+            const signupForm = document.getElementById('signupForm');
+            const signupError = document.getElementById('signupError');
+            if (!signupForm) return;
+            signupForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                const firstName = document.getElementById('signupFirstName').value.trim();
+                const lastName = document.getElementById('signupLastName').value.trim();
+                const email = document.getElementById('signupEmail').value.trim();
+                const password = document.getElementById('signupPassword').value;
+                signupError.textContent = '';
+                if (!firstName || !lastName || !email || !password) {
+                    signupError.textContent = 'All fields are required.';
+                    return;
                 }
-            } catch (error) {
-                loginError.textContent = 'Error: ' + error.message;
-            }
-        });
-
-        // Sign up form
-        const signupForm = document.getElementById('signupForm');
-        const signupError = document.getElementById('signupError');
-
-        signupForm.addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const firstName = document.getElementById('signupFirstName').value.trim();
-            const lastName = document.getElementById('signupLastName').value.trim();
-            const email = document.getElementById('signupEmail').value.trim();
-            const password = document.getElementById('signupPassword').value;
-            
-            signupError.textContent = '';
-            
-            if (!firstName || !lastName || !email || !password) {
-                signupError.textContent = 'All fields are required.';
-                return;
-            }
-            
-            try {
-                const response = await fetch('http://localhost/Oxygym/Register.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ firstName, lastName, email, password })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok && data.status === 'success') {
-                    alert(data.message);
-                    signupForm.reset();
-                    window.location.href = 'index.html';
-                } else {
-                    signupError.textContent = data.message || 'Sign up failed.';
+                try {
+                    const res = await fetch('Register.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ firstName, lastName, email, password })
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.status === 'success') {
+                        alert(data.message || 'Account created');
+                        window.location.href = 'index.html';
+                    } else {
+                        signupError.textContent = data.message || 'Sign up failed.';
+                    }
+                } catch (err) {
+                    signupError.textContent = 'Network error.';
                 }
-            } catch (error) {
-                signupError.textContent = 'Error: ' + error.message;
-            }
-        });
+            });
+        })();
     </script>
 </body>
 </html>
