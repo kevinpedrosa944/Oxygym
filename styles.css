@@ -1,24 +1,25 @@
-/* General Reset and Base Styles */
+/* ---------------- General Reset & Base Styles ---------------- */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    /* Use a consistent font stack */
-    font-family: 'Arial', sans-serif; 
+    font-family: 'Arial', sans-serif;
 }
 
-/* Color Palette based on screenshots:
-   --dark-navy: #1a1a2e; (Main background)
-   --mid-dark-gray: #3a3a40; (Contact box/Input fields)
-   --primary-purple: #4e3a81;
-   --light-purple: #d1c4e9; (Coaches card background)
-   --gold-yellow: #ffcc00; 
-   --light-gray-brown: #a0a09e; (Coaches section background)
-*/
+:root {
+    --dark-navy: #1a1a2e;
+    --mid-dark-gray: #3a3a40;
+    --primary-purple: #4e3a81;
+    --dark-purple: #3f193c;
+    --light-purple-bg: #e1e0f0;
+    --light-purple-card: #d1c4e9;
+    --gold-yellow: #ffcc00;
+    --light-gray-brown: #a0a09e;
+}
 
 body {
+    background-color: var(--dark-navy);
     color: #fff;
-    background-color: var(--dark-navy); 
     line-height: 1.6;
     scroll-behavior: smooth;
 }
@@ -39,23 +40,11 @@ img {
     display: block;
 }
 
-:root {
-    --dark-navy: #1a1a2e; 
-    --mid-dark-gray: #3a3a40; 
-    --primary-purple: #4e3a81;
-    --dark-purple: #3f193c;
-    --light-purple-bg: #e1e0f0; 
-    --light-purple-card: #d1c4e9; 
-    --gold-yellow: #ffcc00; 
-    --light-gray-brown: #a0a09e; 
-}
-
-
-/* --- 1. Navigation/Header Styles --- */
+/* ---------------- Header / Navigation ---------------- */
 header {
-    background-color: rgba(0, 0, 0, 0.4); /* Slightly transparent over hero image */
+    background-color: rgba(0, 0, 0, 0.4);
     padding: 15px 0;
-    position: fixed; /* Fixed navigation bar */
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
@@ -92,51 +81,48 @@ nav ul a {
 }
 
 .register-btn {
-    background-color: var(--gold-yellow); 
+    background-color: var(--gold-yellow);
     color: #000;
-    text-decoration: none;
     padding: 8px 15px;
     border-radius: 5px;
     font-weight: bold;
-    font-size: 0.9rem;
+    text-decoration: none;
 }
 
-/* --- 2. Hero Section Styles --- */
+/* ---------------- Hero Section ---------------- */
 .hero-section {
     position: relative;
-    height: 100vh; 
-    background-image: url('placeholder-hero-man.jpg'); 
+    height: 100vh;
+    background-image: url('placeholder-hero-man.jpg');
     background-size: cover;
-    background-position: center 20%; /* Keep man centered/lowered */
+    background-position: center 20%;
     display: flex;
     align-items: center;
     text-align: left;
 }
 
 .hero-overlay {
-    background-color: rgba(0, 0, 0, 0.5); /* Dark overlay */
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    /* Apply the dark blue/purple shade from the bottom up */
-    background: linear-gradient(to top, var(--primary-purple) 0%, rgba(78, 58, 129, 0.7) 40%, rgba(0, 0, 0, 0.5) 100%);
+    background: linear-gradient(to top, var(--primary-purple) 0%, rgba(78,58,129,0.7) 40%, rgba(0,0,0,0.5) 100%);
 }
 
 .hero-content {
-    position: relative; 
+    position: relative;
     z-index: 10;
-    padding-left: 5%; 
+    padding-left: 5%;
     padding-top: 150px;
 }
 
 .hero-content h2 {
     font-size: 3.5rem;
     margin-bottom: 5px;
-    line-height: 1.1;
     max-width: 500px;
-    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
+    line-height: 1.1;
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.8);
 }
 
 .hero-content p {
@@ -165,11 +151,10 @@ nav ul a {
     border: 2px solid #fff;
 }
 
-/* --- 3. About Section Styles --- */
+/* ---------------- About Section ---------------- */
 .about-section {
-    background-color: var(--primary-purple); /* Dark purple/maroon background */
+    background-color: var(--primary-purple);
     padding: 80px 0;
-    color: #fff;
 }
 
 .about-content {
@@ -188,7 +173,7 @@ nav ul a {
     height: 450px;
     object-fit: cover;
     border-radius: 5px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
 .about-right {
@@ -200,10 +185,8 @@ nav ul a {
 }
 
 .about-text-box h3 {
-    color: #fff;
     font-size: 1rem;
     opacity: 0.7;
-    margin-bottom: 5px;
 }
 
 .oxygym-title {
@@ -215,7 +198,7 @@ nav ul a {
 .about-right p {
     font-size: 1rem;
     max-width: 600px;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255,255,255,0.1);
     padding: 15px;
     border-radius: 5px;
 }
@@ -231,12 +214,12 @@ nav ul a {
 }
 
 .offer-card {
-    background-color: var(--dark-navy); /* Dark background for offer cards */
+    background-color: var(--dark-navy);
     padding: 25px 20px;
     border-radius: 10px;
     text-align: center;
     width: 180px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
 }
 
 .offer-number {
@@ -253,7 +236,7 @@ nav ul a {
 }
 
 .nutrition-card {
-    background-color: #ff0000; /* Red color, contrasting */
+    background-color: #ff0000;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -266,11 +249,10 @@ nav ul a {
     margin-bottom: 5px;
 }
 
-/* --- 4. Membership Plan Section Styles --- */
+/* ---------------- Membership Plan Section ---------------- */
 .plan-section {
     background: linear-gradient(to right, var(--primary-purple) 60%, var(--dark-navy) 40%);
     padding: 80px 0;
-    color: #fff;
     text-align: center;
 }
 
@@ -283,99 +265,6 @@ nav ul a {
 }
 
 .plan-card {
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    border-radius: 15px;
-    width: 280px;
-    padding: 30px 20px;
-    transition: all 0.3s ease;
-}
-
-.plan-card h3 {
-    font-size: 1.5rem;
-    color: var(--gold-yellow);
-    margin-bottom: 10px;
-}
-
-.plan-card .price {
-    font-size: 1.3rem;
-    font-weight: bold;
-    margin-bottom: 15px;
-}
-
-.plan-features {
-    list-style: none;
-    margin-bottom: 20px;
-    text-align: left;
-    padding-left: 20px;
-    font-size: 0.95rem;
-    line-height: 1.8;
-}
-
-.plan-features li {
-    color: #f0f0f0;
-}
-
-.plan-btn {
-    background-color: var(--gold-yellow);
-    border: none;
-    color: #000;
-    font-weight: bold;
-    padding: 10px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.plan-btn:hover {
-    background-color: #ffd633;
-}
-
-/* Add unique theme colors for each plan */
-.plan-card.premium {
-    background: linear-gradient(145deg, #4e3a81, #2c1d60);
-    border-color: var(--gold-yellow);
-}
-
-.plan-card.prime {
-    background: linear-gradient(145deg, #1a237e, #0f144a);
-    border-color: var(--gold-yellow);
-}
-
-.membership-title {
-    text-align: right;
-    font-size: 2rem;
-    margin-bottom: 40px;
-    color: #fff;
-    letter-spacing: 2px;
-    padding-right: 5%;
-    position: relative;
-    z-index: 2;
-}
-
-.plan-header {
-    background-color: var(--dark-navy); 
-    width: 65%;
-    height: 100px;
-    position: absolute;
-    top: 0;
-    left: -20px;
-    transform: skewX(-20deg);
-    z-index: 1;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-}
-
-.our-plan-text {
-    position: absolute;
-    top: 50%;
-    left: 10%;
-    transform: translateY(-50%);
-    font-size: 2.5rem;
-    color: #fff;
-    font-weight: bold;
-    z-index: 2;
-}
-.plan-card {
     width: 150px;
     height: 150px;
     display: flex;
@@ -386,30 +275,31 @@ nav ul a {
     text-align: center;
     padding: 15px;
     color: #fff;
+    border: 2px solid rgba(255,255,255,0.1);
+    transition: all 0.3s ease;
 }
 
 .membership-icon-card {
-    background-color: var(--light-purple-bg); 
+    background-color: var(--light-purple-bg);
     border: 3px solid #fff;
     color: var(--primary-purple);
 }
+
 .membership-icon-card .fa-chess-pawn {
     font-size: 3rem;
     margin-bottom: 10px;
 }
 
-/* Specific Plan Colors */
 .standard-card {
-    background-color: #5d5d7e; /* Gray-blue */
-    background-image: linear-gradient(to bottom right, #5d5d7e, #4b4b6b);
+    background: linear-gradient(to bottom right, #5d5d7e, #4b4b6b);
 }
+
 .prime-card {
-    background-color: #388e3c; /* Green */
-    background-image: linear-gradient(to bottom right, #4caf50, #388e3c);
+    background: linear-gradient(to bottom right, #4caf50, #388e3c);
 }
-.primuim-card {
-    background-color: #1a237e; /* Dark Blue */
-    background-image: linear-gradient(to bottom right, #303f9f, #1a237e);
+
+.premium-card {
+    background: linear-gradient(to bottom right, #303f9f, #1a237e);
 }
 
 .plan-rate {
@@ -423,257 +313,82 @@ nav ul a {
     margin: 5px 0;
 }
 
-.primuim-card .fa-crown {
-    font-size: 1.2rem;
-    margin-left: 5px;
-    color: var(--gold-yellow);
-}
-
 .plan-detail {
     font-size: 0.8rem;
     opacity: 0.8;
 }
 
-/* --- 5. Coaches Section Styles --- */
-.coaches-section {
-    background-color: var(--light-gray-brown); 
-    padding: 80px 0;
-    position: relative;
-    color: #2c2c3c;
-    background-image: url('placeholder-coach-bg-logo.png'); 
-    background-repeat: no-repeat;
-    background-position: center 50px;
-    background-size: 400px;
-    background-blend-mode: multiply; /* Optional: to make the background logo subtle */
+.plan-btn {
+    background-color: var(--gold-yellow);
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
 }
 
-.coaches-title {
-    text-align: center;
-    font-size: 2.5rem;
-    margin-bottom: 50px;
-    color: var(--dark-navy);
-    letter-spacing: 2px;
+.plan-btn:hover {
+    background-color: #ffd633;
 }
 
-.coaches-grid {
-    display: flex;
-    justify-content: center;
-    gap: 40px;
-}
-
-.coach-card {
-    background-color: var(--light-purple-card); /* Light purple card */
-    padding: 30px 20px;
-    border-radius: 10px;
-    text-align: center;
-    width: 250px;
-    height: 300px; /* Make card fixed height for layout consistency */
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end; /* Push content to bottom as in image */
-    align-items: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
-
-.coach-image-circle {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    overflow: hidden;
-    margin: 0 auto -70px; /* Pull image up above the card */
-    border: 5px solid #fff; 
-    position: relative;
-    top: -150px; /* Positioning the image correctly */
-}
-
-.coach-image-circle img {
+/* ---------------- Registration Modal ---------------- */
+#registrationModal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.7);
 }
 
-.coach-name {
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: var(--primary-purple);
-    margin-top: 10px;
-}
-
-/* --- 6. Visit Us and Registration Section Styles --- */
-.visit-register-section {
-    background-color: var(--mid-dark-gray); /* Main dark background */
-    padding: 80px 0;
-    background-image: url('placeholder-gym-bg.jpg'); /* Background gym image */
-    background-size: cover;
-    background-position: center;
-    position: relative;
-}
-
-.visit-register-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7); /* Dark overlay */
-}
-
-.visit-register-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    position: relative;
-    z-index: 10;
-    gap: 50px;
-}
-
-/* Visit Our Gym Box (Top Right) */
-.visit-gym-box {
-    background-color: #2c2c3c; /* Dark navy for the info box */
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-    width: 40%;
-    min-width: 350px;
-    margin-top: -30px; /* slight lift effect */
-}
-
-.map-placeholder {
-    background-image: url('placeholder-map.png'); 
-    background-color: #2c2c3c;
-    background-size: cover;
-    background-position: center;
-    height: 250px;
-    width: 100%;
+.registration-container {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px 30px;
     border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 1.2rem;
-    border: 1px solid #4e3a81; /* Blue border line from image */
-}
-
-.contact-info h2 {
-    font-size: 1.8rem;
-    color: #fff;
-    margin-top: 20px;
-    margin-bottom: 20px;
-    letter-spacing: 1px;
-}
-
-.contact-info p {
-    margin-bottom: 10px;
-    font-size: 1rem;
-    font-weight: 300;
-}
-
-.socials {
-    margin-top: 20px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.socials h4 {
-    color: #fff;
-    font-weight: 400;
-    margin-bottom: 10px;
-}
-
-.socials a {
-    color: #fff;
-    font-size: 1.5rem;
-    margin-right: 15px;
-    background-color: rgba(255, 255, 255, 0.1);
-    padding: 5px 8px;
-    border-radius: 50%;
-}
-
-/* The two bottom elements are now on the left and right */
-.bottom-content-row {
-    width: 55%;
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-}
-
-/* Registration Form (Left Column Top) */
-.register-section {
-    padding-top: 20px;
-}
-
-.register-section h2 {
-    font-size: 2.5rem;
-    margin-bottom: 25px;
-    color: #fff;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-
-.register-section input[type="text"],
-.register-section input[type="email"],
-.register-section input[type="tel"] {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    border: none;
-    border-radius: 5px;
-    background-color: var(--mid-dark-gray); 
-    font-size: 1rem;
-    color: #fff;
-}
-.register-section input::placeholder {
-    color: #ccc;
-}
-
-.form-actions button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-right: 15px;
-}
-
-.submit-btn {
-    background-color: var(--gold-yellow);
+    width: 400px;
+    position: relative;
     color: #000;
 }
 
-.clear-btn {
-    background-color: transparent;
-    border: 1px solid #fff;
-    color: #fff;
+.registration-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
 }
 
-/* Customer Progress (Left Column Bottom) */
-.progress-section {
-    padding-top: 20px;
+.registration-container .close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
 }
 
-.progress-title {
-    font-size: 2.5rem;
-    margin-bottom: 25px;
-    color: var(--gold-yellow);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-
-.progress-images {
-    display: flex;
-    gap: 15px;
-}
-
-.progress-images img {
-    width: calc(33.333% - 10px); 
-    height: 300px;
-    object-fit: cover;
+.registration-container input,
+.registration-container select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
     border-radius: 5px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    border: 1px solid #ccc;
 }
 
-/* --- 7. Footer Styles --- */
+.form-buttons {
+    display: flex;
+    justify-content: space-between;
+}
+
+.clear-btn {
+    background-color: #ccc;
+    color: #000;
+}
+
+/* ---------------- Footer ---------------- */
 footer {
     background-color: #222;
     padding: 40px 0;
@@ -682,7 +397,7 @@ footer {
 
 .footer-content {
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
 }
 
 .footer-links {
@@ -693,7 +408,6 @@ footer {
 .footer-links h4 {
     font-size: 1.1rem;
     margin-bottom: 15px;
-    color: #fff;
 }
 
 .footer-links ul {
@@ -708,56 +422,5 @@ footer {
     text-decoration: none;
     color: #ccc;
     font-size: 0.9rem;
-
-}
-.modal {
-    display: none; /* Hidden by default */
-    position: fixed;
-    z-index: 2000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.7);
-}
-
-.modal-content {
-    background-color: #fff;
-    margin: 10% auto;
-    padding: 30px;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 500px;
-    position: relative;
-}
-
-.modal-content h2 {
-    margin-bottom: 20px;
-    color: #4e3a81;
-}
-
-.modal-content label {
-    display: block;
-    margin-top: 10px;
-    font-weight: bold;
-}
-
-.modal-content input,
-.modal-content select {
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-}
-
-.close {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    font-size: 25px;
-    font-weight: bold;
-    cursor: pointer;
 }
 
