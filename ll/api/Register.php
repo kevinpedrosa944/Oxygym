@@ -1,10 +1,10 @@
 <?php
-include('includes/headers.php');
-include('includes/validate.php');
+include('../includes/headers.php');
+include('../includes/validate.php');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode(['status' => 'error', 'message' => 'Method not allowed.']);
+    echo json_encode(['status' => 'error', 'message' => 'Method not allowed. Use POST.']);
     exit;
 }
 
@@ -18,13 +18,13 @@ if (empty($raw)) {
 $data = json_decode($raw, true);
 if (json_last_error() !== JSON_ERROR_NONE) {
     http_response_code(400);
-    echo json_encode(['status' => 'error', 'message' => 'Invalid JSON.']);
+    echo json_encode(['status' => 'error', 'message' => 'Invalid JSON: ' . json_last_error_msg()]);
     exit;
 }
 
-$firstName = trim($data['firstName'] ?? '');
-$lastName = trim($data['lastName'] ?? '');
-$email = trim($data['email'] ?? '');
+$firstName = sanitizeInput($data['firstName'] ?? '');
+$lastName = sanitizeInput($data['lastName'] ?? '');
+$email = sanitizeInput($data['email'] ?? '');
 $password = $data['password'] ?? '';
 
 if (!$firstName || !$lastName || !$email || !$password) {
@@ -41,14 +41,22 @@ if (!validateEmail($email)) {
 
 if (!validatePasswordStrength($password)) {
     http_response_code(400);
-    echo json_encode(['status' => 'error', 'message' => 'Password must be at least 6 characters.']);
+    echo json_encode(['status' => 'error', 'message' => 'Password must be at least 6 characters long.']);
     exit;
 }
+
+$hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+// TODO: INSERT INTO users (first_name, last_name, email, password) VALUES (?, ?, ?, ?)
 
 http_response_code(201);
 echo json_encode([
     'status' => 'success',
-    'message' => 'Account created successfully!',
-    'user' => ['firstName' => $firstName, 'lastName' => $lastName, 'email' => $email]
+    'message' => 'Account created successfully! You can now login.',
+    'user' => [
+        'firstName' => $firstName,
+        'lastName' => $lastName,
+        'email' => $email
+    ]
 ]);
 ?>

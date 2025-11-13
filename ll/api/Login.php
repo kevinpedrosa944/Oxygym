@@ -1,11 +1,11 @@
 <?php
 session_start();
-include('includes/headers.php');
-include('includes/users.php');
+include('../includes/headers.php');
+include('../includes/users.php');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode(['status' => 'error', 'message' => 'Method not allowed.']);
+    echo json_encode(['status' => 'error', 'message' => 'Method not allowed. Use POST.']);
     exit;
 }
 
@@ -19,7 +19,7 @@ if (empty($raw)) {
 $data = json_decode($raw, true);
 if (json_last_error() !== JSON_ERROR_NONE) {
     http_response_code(400);
-    echo json_encode(['status' => 'error', 'message' => 'Invalid JSON.']);
+    echo json_encode(['status' => 'error', 'message' => 'Invalid JSON: ' . json_last_error_msg()]);
     exit;
 }
 
@@ -28,7 +28,7 @@ $password = $data['password'] ?? '';
 
 if ($username === '' || $password === '') {
     http_response_code(400);
-    echo json_encode(['status' => 'error', 'message' => 'Username and password required.']);
+    echo json_encode(['status' => 'error', 'message' => 'Username and password are required.']);
     exit;
 }
 

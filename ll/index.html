@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OxyGym - Start a better shape of you!</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+    <header>
+        <div class="container nav-container">
+            <h1 class="logo">LOGO OF OXYGYM</h1>
+            <nav>
+                <ul>
+                    <li><a href="#about-section">About</a></li>
+                    <li><a href="#plan-section">Plan</a></li>
+                </ul>
+            </nav>
+            <div id="authButtons">
+                <a href="Login.html" class="register-btn">Sign Up</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero-section">
+        <div class="hero-overlay">
+            <h1>Welcome to OxyGym</h1>
+            <p>Transform your body, transform your life</p>
+            <button class="hero-btn" onclick="window.location.href='pages/subs.php'">Come Join Us!</button>
+        </div>
+    </section>
+
+    <section id="about-section" class="about-section">
+        <h2>About OxyGym</h2>
+        <div class="about-content">
+            <p>
+                At OxyGym, we believe in helping you achieve your fitness goals. 
+                Our state-of-the-art facilities and experienced trainers are here to support your journey.
+            </p>
+        </div>
+    </section>
+    
+    <section id="plan-section" class="plan-section">
+        <h2>Our Plans</h2>
+        <div class="plans-container">
+            <div class="plan-card">
+                <h3>Standard</h3>
+                <p class="plan-price">$29/month</p>
+                <p>Basic gym access</p>
+                <button class="plan-btn" onclick="subscribePlan('Standard')">Subscribe</button>
+            </div>
+            <div class="plan-card">
+                <h3>Prime</h3>
+                <p class="plan-price">$49/month</p>
+                <p>+ 1 on 1 coaching</p>
+                <button class="plan-btn" onclick="subscribePlan('Prime')">Subscribe</button>
+            </div>
+            <div class="plan-card">
+                <h3>Premium</h3>
+                <p class="plan-price">$99/month</p>
+                <p>+ Nutrition plan</p>
+                <button class="plan-btn" onclick="subscribePlan('Premium')">Subscribe</button>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 OxyGym. All rights reserved.</p>
+    </footer>
+
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
+
