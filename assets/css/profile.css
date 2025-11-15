@@ -1,0 +1,182 @@
+/* Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body.profile-page {
+    background-color: #1a1a2e;
+    color: #fff;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+header {
+    background-color: rgba(0,0,0,0.5);
+    padding: 15px 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 900;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+}
+
+nav ul li {
+    margin-left: 20px;
+}
+
+nav ul a {
+    text-decoration: none;
+    color: #fff;
+    font-weight: 500;
+}
+
+.register-btn {
+    background-color: #ffcc00;
+    color: #000;
+    padding: 8px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* Main Profile Frame */
+.profile-frame {
+    padding-top: 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    align-items: center;
+}
+
+/* Profile Header */
+.profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid #ffcc00;
+    object-fit: cover;
+}
+
+.profile-text h1 {
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+.profile-text p {
+    font-size: 1rem;
+    color: #ccc;
+}
+
+/* User Details */
+.user-details dl {
+    display: flex;
+    gap: 40px;
+}
+
+.detail-item dt {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.detail-item dd {
+    color: #ffcc00;
+}
+
+/* Stats Card */
+.stats-card {
+    display: flex;
+    align-items: center;
+    background-color: rgba(255,255,255,0.05);
+    padding: 20px;
+    border-radius: 10px;
+    gap: 20px;
+}
+
+.stats-card .clock {
+    width: 50px;
+    height: 50px;
+}
+
+.stats-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+/* Review Card */
+.review-card {
+    background-color: rgba(255,255,255,0.05);
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 600px;
+}
+
+.rating {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.review-text h3 {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.review-text p {
+    color: #ccc;
+}
+
+.reviewer-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.reviewer-info .avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+}
