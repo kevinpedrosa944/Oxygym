@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile - Jairus Noelle B. Segovia</title>
-    <link rel="stylesheet" href="assets\css\profile.css">
+    <link rel="stylesheet" href="assets/css/profile.css">
 </head>
-<body class="profile-page">
+<body>
 
     <!-- Header -->
     <header>
@@ -22,20 +22,22 @@
         </div>
     </header>
 
-    <main class="profile-frame">
+
+    <main class="frame">
 
         <!-- Profile Header -->
         <section class="profile-header">
-            <img class="profile-avatar" src="assets/images/ellipse-19.svg" alt="Profile picture">
-            <div class="profile-text">
-                <h1>JAIRUS NOELLE B. SEGOVIA</h1>
-                <p>segoviajairus339@gmail.com</p>
+            <img class="profile-avatar" src="assets/images/ellipse-19.svg" alt="Profile picture of Jairus Noelle B. Segovia">
+            <div class="text-content-flow">
+                <h1 class="heading">JAIRUS NOELLE B. SEGOVIA</h1>
+                <p class="subheading">segoviajairus339@gmail.com</p>
             </div>
         </section>
 
         <!-- User Details -->
-        <section class="user-details">
-            <dl>
+        <section class="user-details" aria-labelledby="user-details-heading">
+            <h2 id="user-details-heading" class="visually-hidden">User Details</h2>
+            <dl class="details-list">
                 <div class="detail-item">
                     <dt>Phone number:</dt>
                     <dd>09123456712</dd>
@@ -52,32 +54,41 @@
         </section>
 
         <!-- Stats Card -->
-        <aside class="stats-card">
+        <aside class="stats-card" aria-labelledby="stats-heading">
+            <h2 id="stats-heading" class="visually-hidden">Membership Duration</h2>
             <img class="clock" src="assets/images/clock.svg" alt="Clock icon">
-            <div class="stats-text">
-                <p class="stat-number">100</p>
-                <p class="stat-label">Days</p>
+            <div class="review-body">
+                <div class="div-wrapper">
+                    <p class="text-heading">100</p>
+                </div>
+                <div class="div-wrapper">
+                    <p class="text">Days</p>
+                </div>
             </div>
         </aside>
 
         <!-- Review Card -->
-        <article class="review-card">
-            <div class="rating">
-                <img src="assets/images/star.svg" alt="">
-                <img src="assets/images/star.svg" alt="">
-                <img src="assets/images/star.svg" alt="">
-                <img src="assets/images/star.svg" alt="">
-                <img src="assets/images/star-empty.svg" alt="">
+        <article class="review-card" aria-labelledby="review-title">
+            <div class="rating" role="img" aria-label="Rating: 4 out of 5 stars">
+                <img class="star" src="assets/images/star.svg" alt="">
+                <img class="star" src="assets/images/star.svg" alt="">
+                <img class="star" src="assets/images/star.svg" alt="">
+                <img class="star" src="assets/images/star.svg" alt="">
+                <img class="star" src="assets/images/star-empty.svg" alt="">
             </div>
-            <div class="review-text">
-                <h3>Review title</h3>
-                <p>Review body</p>
+            <div class="div">
+                <div class="text-heading-wrapper">
+                    <h3 id="review-title" class="text-wrapper">Review title</h3>
+                </div>
+                <div class="text-2">
+                    <p class="text-3">Review body</p>
+                </div>
             </div>
-            <footer class="reviewer-info">
-                <div class="avatar" style="background-image: url('assets/images/shape.png')"></div>
-                <div>
-                    <p class="reviewer-name">Reviewer name</p>
-                    <time class="review-date">Date</time>
+            <footer class="avatar-block">
+                <div class="avatar" role="img" aria-label="Reviewer avatar" style="background-image: url('assets/images/shape.png')"></div>
+                <div class="info">
+                    <p class="title">Reviewer name</p>
+                    <time class="description" datetime="">Date</time>
                 </div>
             </footer>
         </article>
@@ -86,4 +97,3 @@
 
 </body>
 </html>
-
