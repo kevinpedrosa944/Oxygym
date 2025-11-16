@@ -1,11 +1,53 @@
 <?php
+session_start();
+include('../includes/db_connect.php');
+include('../includes/validate.php');
 include('../includes/auth.php');
+
+// Handle subscription form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
+    $plan = sanitizeInput($_POST['plan']);
+    $memberId = null;
+    
+    // Get member ID from username
+    $stmt = $conn->prepare("SELECT Member_ID FROM Users WHERE Username = ?");
+    if (!$stmt) {
+        die('Database error: ' . $conn->error);
+    }
+    
+    $stmt->bind_param("s", $_SESSION['username']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $memberId = $row['Member_ID'];
+        
+        // Insert subscription record
+        $subStmt = $conn->prepare("INSERT INTO Subscription_History (Member_ID, Plan_Type, Start_Date, Status) 
+                                   VALUES (?, ?, NOW(), 'Active')");
+        
+        if ($subStmt) {
+            $subStmt->bind_param("is", $memberId, $plan);
+            $subStmt->execute();
+            $subStmt->close();
+            
+            // Redirect to profile
+            header("Location: /Oxygym/profile.php");
+            exit();
+        }
+    }
+    $stmt->close();
+}
+
+$conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <title>Subscribe - OxyGym</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -69,7 +111,7 @@ include('../includes/auth.php');
                 </ul>
             </nav>
             <div id="authButtons">
-                <a href="../logout.php" class="register-btn">Logout</a>
+                <a href="#" class="register-btn" onclick="handleLogout(event)">Logout</a>
             </div>
         </div>
     </header>
@@ -83,21 +125,21 @@ include('../includes/auth.php');
                 <label class="plan-option">
                     <input type="radio" name="plan" value="Standard" required>
                     <h3>STANDARD</h3>
-                    <p>$29/month</p>
+                    <p>₱999/month</p>
                     <small>Basic access to gym</small>
                 </label>
 
                 <label class="plan-option">
                     <input type="radio" name="plan" value="Prime">
                     <h3>PRIME</h3>
-                    <p>$49/month</p>
+                    <p>₱1,499/month</p>
                     <small>+ 1 on 1 coaching</small>
                 </label>
 
                 <label class="plan-option">
                     <input type="radio" name="plan" value="Premium">
                     <h3>PREMIUM</h3>
-                    <p>$99/month</p>
+                    <p>₱14,999/year</p>
                     <small>+ Nutrition plan</small>
                 </label>
             </div>
@@ -109,5 +151,13 @@ include('../includes/auth.php');
             <a href="../index.html">← Back to Home</a>
         </div>
     </div>
+
+    <script src="../assets/js/app.js"></script>
+    <script>
+        function handleLogout(event) {
+            event.preventDefault();
+            window.location.href = '/Oxygym/logout.php';
+        }
+    </script>
 </body>
-</html></nav>
+</html>

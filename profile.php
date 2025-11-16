@@ -1,5 +1,6 @@
 <?php
 session_start();
+include('includes/db_connect.php');
 include('includes/auth.php');
 
 // Check if user has active subscription
@@ -7,13 +8,21 @@ $checkSub = $conn->prepare("SELECT Subscription_History.Subscription_ID
                             FROM Users 
                             LEFT JOIN Members ON Users.Member_ID = Members.Member_ID 
                             LEFT JOIN Subscription_History ON Members.Member_ID = Subscription_History.Member_ID 
-                            WHERE Users.Username = ? AND Subscription_History.Status = 'Active'");
+                            WHERE Users.Username = ? AND Subscription_History.Status = 'Active'
+                            LIMIT 1");
+
+if (!$checkSub) {
+    die(json_encode(['status' => 'error', 'message' => 'Query error: ' . $conn->error]));
+}
+
 $checkSub->bind_param("s", $_SESSION['username']);
 $checkSub->execute();
 $subResult = $checkSub->get_result();
 
 // If no active subscription, redirect to subscription page
 if ($subResult->num_rows === 0) {
+    $checkSub->close();
+    $conn->close();
     header("Location: /Oxygym/pages/subs.php");
     exit();
 }
@@ -25,6 +34,8 @@ $phone = $_SESSION['phone'] ?? 'N/A';
 $membershipType = $_SESSION['membership'] ?? 'Standard';
 $membershipStatus = $_SESSION['status'] ?? 'Active';
 $daysActive = $_SESSION['days_active'] ?? 0;
+
+$conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
