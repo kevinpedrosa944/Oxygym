@@ -2,7 +2,13 @@
 session_start();
 session_unset();
 session_destroy();
-setcookie(session_name(), '', time() - 3600, '/');
-header("Location: index.html");
+
+// Clear all cookies
+foreach ($_COOKIE as $key => $value) {
+    setcookie($key, '', time() - 3600, '/');
+}
+
+// Redirect to home
+header("Location: /Oxygym/index.html");
 exit();
 ?>

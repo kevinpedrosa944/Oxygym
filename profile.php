@@ -1,4 +1,5 @@
 <?php
+session_start();
 include('includes/auth.php');
 $username = $_SESSION['username'] ?? 'Guest';
 $email = $_SESSION['email'] ?? 'user@example.com';
@@ -184,13 +185,13 @@ $daysActive = $_SESSION['days_active'] ?? 0;
             <h1 class="logo">LOGO OF OXYGYM</h1>
             <nav>
                 <ul>
-                    <li><a href="index.html#about-section">About</a></li>
-                    <li><a href="index.html#plan-section">Plan</a></li>
-                    <li><a href="profile.php">Profile</a></li>
+                    <li><a href="/Oxygym/index.html#about-section">About</a></li>
+                    <li><a href="/Oxygym/index.html#plan-section">Plan</a></li>
+                    <li><a href="/Oxygym/profile.php">Profile</a></li>
                 </ul>
             </nav>
             <div id="authButtons">
-                <a href="logout.php" class="register-btn">Logout</a>
+                <a href="/Oxygym/logout.php" class="register-btn">Logout</a>
             </div>
         </div>
     </header>
@@ -242,12 +243,12 @@ $daysActive = $_SESSION['days_active'] ?? 0;
 
         <!-- Action Buttons -->
         <div class="action-buttons">
-            <a href="pages/subs.php" class="btn-subscribe">View Plans</a>
-            <a href="logout.php" class="btn-logout">Logout</a>
+            <a href="/Oxygym/pages/subs.php" class="btn-subscribe">View Plans</a>
+            <a href="/Oxygym/logout.php" class="btn-logout">Logout</a>
         </div>
 
         <div class="back-link">
-            <a href="index.html">← Back to Home</a>
+            <a href="/Oxygym/index.html">← Back to Home</a>
         </div>
 
     </main>
