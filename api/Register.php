@@ -4,7 +4,7 @@ include('../includes/validate.php');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode(['status' => 'error', 'message' => 'Method not allowed. Use POST.']);
+    echo json_encode(['status' => 'error', 'message' => 'Method not allowed.']);
     exit;
 }
 
@@ -18,13 +18,13 @@ if (empty($raw)) {
 $data = json_decode($raw, true);
 if (json_last_error() !== JSON_ERROR_NONE) {
     http_response_code(400);
-    echo json_encode(['status' => 'error', 'message' => 'Invalid JSON: ' . json_last_error_msg()]);
+    echo json_encode(['status' => 'error', 'message' => 'Invalid JSON.']);
     exit;
 }
 
-$firstName = sanitizeInput($data['firstName'] ?? '');
-$lastName = sanitizeInput($data['lastName'] ?? '');
-$email = sanitizeInput($data['email'] ?? '');
+$firstName = trim($data['firstName'] ?? '');
+$lastName = trim($data['lastName'] ?? '');
+$email = trim($data['email'] ?? '');
 $password = $data['password'] ?? '';
 
 if (!$firstName || !$lastName || !$email || !$password) {
@@ -44,10 +44,6 @@ if (!validatePasswordStrength($password)) {
     echo json_encode(['status' => 'error', 'message' => 'Password must be at least 6 characters long.']);
     exit;
 }
-
-$hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-
-// TODO: INSERT INTO users (first_name, last_name, email, password) VALUES (?, ?, ?, ?)
 
 http_response_code(201);
 echo json_encode([

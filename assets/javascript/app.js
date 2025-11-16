@@ -5,16 +5,29 @@ function checkLoginStatus() {
         .then(data => {
             const authButtons = document.getElementById('authButtons');
             if (data.loggedIn) {
-                authButtons.innerHTML = '<a href="logout.php" class="register-btn">Logout</a>';
+                // User IS logged in - show Logout button
+                authButtons.innerHTML = `
+                    <a href="profile.php" class="register-btn" style="margin-right: 0.5rem;">
+                        <i class="fas fa-user"></i> Profile
+                    </a>
+                    <a href="logout.php" class="register-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                `;
             } else {
-                authButtons.innerHTML = '<a href="Login.html" class="register-btn">Sign Up</a>';
+                // User NOT logged in - show Sign Up button
+                authButtons.innerHTML = `
+                    <a href="Login.html" class="register-btn">
+                        <i class="fas fa-user-plus"></i> Sign Up
+                    </a>
+                `;
             }
         })
         .catch(err => console.log('Session check failed:', err));
 }
 
 // Check on page load
-checkLoginStatus();
+document.addEventListener('DOMContentLoaded', checkLoginStatus);
 
 // Subscribe button handler
 function subscribePlan(plan) {

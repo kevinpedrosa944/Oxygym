@@ -41,6 +41,10 @@ if (!array_key_exists($username, $DEMO_USERS)) {
 $storedHash = $DEMO_USERS[$username];
 if (password_verify($password, $storedHash)) {
     $_SESSION['username'] = $username;
+    $_SESSION['email'] = $username . '@oxygym.com';
+    $_SESSION['membership'] = 'Standard';
+    $_SESSION['status'] = 'Active';
+    
     http_response_code(200);
     echo json_encode(['status' => 'success', 'message' => 'Login successful!']);
     exit;
