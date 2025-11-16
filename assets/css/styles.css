@@ -125,9 +125,9 @@ nav ul a {
 }
 
 .hero-content {
-    position: relative; 
+    position: relative;
     z-index: 10;
-    padding-left: 5%; 
+    padding-left: 5%;
     padding-top: 150px;
 }
 
@@ -268,240 +268,6 @@ nav ul a {
 
 /* --- 4. Membership Plan Section Styles --- */
 .plan-section {
-<<<<<<< HEAD
-    background: linear-gradient(to right, var(--primary-purple) 60%, var(--dark-navy) 40%);
-    padding: 80px 0;
-    color: #fff;
-    text-align: center;
-}
-
-.plans-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 30px;
-    margin-top: 40px;
-}
-
-.plan-card {
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    border-radius: 15px;
-    width: 280px;
-    padding: 30px 20px;
-    transition: all 0.3s ease;
-}
-
-.plan-card h3 {
-    font-size: 1.5rem;
-    color: var(--gold-yellow);
-    margin-bottom: 10px;
-}
-
-.plan-card .price {
-    font-size: 1.3rem;
-    font-weight: bold;
-    margin-bottom: 15px;
-}
-
-.plan-features {
-    list-style: none;
-    margin-bottom: 20px;
-    text-align: left;
-    padding-left: 20px;
-    font-size: 0.95rem;
-    line-height: 1.8;
-}
-
-.plan-features li {
-    color: #f0f0f0;
-}
-
-.plan-btn {
-    background-color: var(--gold-yellow);
-    border: none;
-    color: #000;
-    font-weight: bold;
-    padding: 10px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.plan-btn:hover {
-    background-color: #ffd633;
-}
-
-/* Add unique theme colors for each plan */
-.plan-card.premium {
-    background: linear-gradient(145deg, #4e3a81, #2c1d60);
-    border-color: var(--gold-yellow);
-}
-
-.plan-card.prime {
-    background: linear-gradient(145deg, #1a237e, #0f144a);
-    border-color: var(--gold-yellow);
-}
-
-.membership-title {
-    text-align: right;
-    font-size: 2rem;
-    margin-bottom: 40px;
-    color: #fff;
-    letter-spacing: 2px;
-    padding-right: 5%;
-    position: relative;
-    z-index: 2;
-}
-
-.plan-header {
-    background-color: var(--dark-navy); 
-    width: 65%;
-    height: 100px;
-    position: absolute;
-    top: 0;
-    left: -20px;
-    transform: skewX(-20deg);
-    z-index: 1;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-}
-
-.our-plan-text {
-    position: absolute;
-    top: 50%;
-    left: 10%;
-    transform: translateY(-50%);
-    font-size: 2.5rem;
-    color: #fff;
-    font-weight: bold;
-    z-index: 2;
-}
-.plan-card {
-    width: 150px;
-    height: 150px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    border-radius: 10px;
-    text-align: center;
-    padding: 15px;
-    color: #fff;
-}
-
-.membership-icon-card {
-    background-color: var(--light-purple-bg); 
-    border: 3px solid #fff;
-    color: var(--primary-purple);
-}
-.membership-icon-card .fa-chess-pawn {
-    font-size: 3rem;
-    margin-bottom: 10px;
-}
-
-/* Specific Plan Colors */
-.standard-card {
-    background-color: #5d5d7e; /* Gray-blue */
-    background-image: linear-gradient(to bottom right, #5d5d7e, #4b4b6b);
-}
-.prime-card {
-    background-color: #388e3c; /* Green */
-    background-image: linear-gradient(to bottom right, #4caf50, #388e3c);
-}
-.primuim-card {
-    background-color: #1a237e; /* Dark Blue */
-    background-image: linear-gradient(to bottom right, #303f9f, #1a237e);
-}
-
-.plan-rate {
-    font-size: 2rem;
-    font-weight: bold;
-    line-height: 1.1;
-}
-
-.plan-card h4 {
-    font-size: 0.9rem;
-    margin: 5px 0;
-}
-
-.primuim-card .fa-crown {
-    font-size: 1.2rem;
-    margin-left: 5px;
-    color: var(--gold-yellow);
-}
-
-.plan-detail {
-    font-size: 0.8rem;
-    opacity: 0.8;
-}
-
-/* --- 5. Coaches Section Styles --- */
-.coaches-section {
-    background-color: var(--light-gray-brown); 
-    padding: 80px 0;
-    position: relative;
-    color: #2c2c3c;
-    background-image: url('placeholder-coach-bg-logo.png'); 
-    background-repeat: no-repeat;
-    background-position: center 50px;
-    background-size: 400px;
-    background-blend-mode: multiply; /* Optional: to make the background logo subtle */
-}
-
-.coaches-title {
-    text-align: center;
-    font-size: 2.5rem;
-    margin-bottom: 50px;
-    color: var(--dark-navy);
-    letter-spacing: 2px;
-}
-
-.coaches-grid {
-    display: flex;
-    justify-content: center;
-    gap: 40px;
-}
-
-.coach-card {
-    background-color: var(--light-purple-card); /* Light purple card */
-    padding: 30px 20px;
-    border-radius: 10px;
-    text-align: center;
-    width: 250px;
-    height: 300px; /* Make card fixed height for layout consistency */
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end; /* Push content to bottom as in image */
-    align-items: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
-
-.coach-image-circle {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    overflow: hidden;
-    margin: 0 auto -70px; /* Pull image up above the card */
-    border: 5px solid #fff; 
-    position: relative;
-    top: -150px; /* Positioning the image correctly */
-}
-
-.coach-image-circle img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.coach-name {
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: var(--primary-purple);
-    margin-top: 10px;
-}
-
-/* --- 6. Visit Us and Registration Section Styles --- */
-=======
     background-color: #fff;
     padding: 60px 0;
 }
@@ -592,7 +358,6 @@ nav ul a {
 }
 
 /* --- 5. Visit Us and Registration Section Styles --- */
->>>>>>> 50e565672abed165bceda04d7ac29d3635275ba5
 .visit-register-section {
     background-color: var(--mid-dark-gray); /* Main dark background */
     padding: 80px 0;
@@ -633,7 +398,7 @@ nav ul a {
 }
 
 .map-placeholder {
-    background-image: url('placeholder-map.png'); 
+    background-image: url('placeholder-map.png');
     background-color: #2c2c3c;
     background-size: cover;
     background-position: center;
@@ -712,7 +477,7 @@ nav ul a {
     margin-bottom: 15px;
     border: none;
     border-radius: 5px;
-    background-color: var(--mid-dark-gray); 
+    background-color: var(--mid-dark-gray);
     font-size: 1rem;
     color: #fff;
 }
@@ -759,7 +524,7 @@ nav ul a {
 }
 
 .progress-images img {
-    width: calc(33.333% - 10px); 
+    width: calc(33.333% - 10px);
     height: 300px;
     object-fit: cover;
     border-radius: 5px;
@@ -801,59 +566,4 @@ footer {
     text-decoration: none;
     color: #ccc;
     font-size: 0.9rem;
-<<<<<<< HEAD
-
 }
-.modal {
-    display: none; /* Hidden by default */
-    position: fixed;
-    z-index: 2000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.7);
-}
-
-.modal-content {
-    background-color: #fff;
-    margin: 10% auto;
-    padding: 30px;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 500px;
-    position: relative;
-}
-
-.modal-content h2 {
-    margin-bottom: 20px;
-    color: #4e3a81;
-}
-
-.modal-content label {
-    display: block;
-    margin-top: 10px;
-    font-weight: bold;
-}
-
-.modal-content input,
-.modal-content select {
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-}
-
-.close {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    font-size: 25px;
-    font-weight: bold;
-    cursor: pointer;
-}
-=======
-}
->>>>>>> 50e565672abed165bceda04d7ac29d3635275ba5
