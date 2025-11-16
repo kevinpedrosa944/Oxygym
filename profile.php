@@ -1,6 +1,24 @@
 <?php
 session_start();
 include('includes/auth.php');
+
+// Check if user has active subscription
+$checkSub = $conn->prepare("SELECT Subscription_History.Subscription_ID 
+                            FROM Users 
+                            LEFT JOIN Members ON Users.Member_ID = Members.Member_ID 
+                            LEFT JOIN Subscription_History ON Members.Member_ID = Subscription_History.Member_ID 
+                            WHERE Users.Username = ? AND Subscription_History.Status = 'Active'");
+$checkSub->bind_param("s", $_SESSION['username']);
+$checkSub->execute();
+$subResult = $checkSub->get_result();
+
+// If no active subscription, redirect to subscription page
+if ($subResult->num_rows === 0) {
+    header("Location: /Oxygym/pages/subs.php");
+    exit();
+}
+$checkSub->close();
+
 $username = $_SESSION['username'] ?? 'Guest';
 $email = $_SESSION['email'] ?? 'user@example.com';
 $phone = $_SESSION['phone'] ?? 'N/A';
@@ -17,7 +35,6 @@ $daysActive = $_SESSION['days_active'] ?? 0;
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* Profile-specific styles (integrated into styles.css later) */
         .profile-container {
             max-width: 900px;
             margin: 2rem auto;
@@ -187,11 +204,10 @@ $daysActive = $_SESSION['days_active'] ?? 0;
                 <ul>
                     <li><a href="/Oxygym/index.html#about-section">About</a></li>
                     <li><a href="/Oxygym/index.html#plan-section">Plan</a></li>
-                    <li><a href="/Oxygym/profile.php">Profile</a></li>
                 </ul>
             </nav>
             <div id="authButtons">
-                <a href="/Oxygym/logout.php" class="register-btn">Logout</a>
+                <a href="#" class="register-btn" onclick="handleLogout(event)">Logout</a>
             </div>
         </div>
     </header>
@@ -243,8 +259,8 @@ $daysActive = $_SESSION['days_active'] ?? 0;
 
         <!-- Action Buttons -->
         <div class="action-buttons">
-            <a href="/Oxygym/pages/subs.php" class="btn-subscribe">View Plans</a>
-            <a href="/Oxygym/logout.php" class="btn-logout">Logout</a>
+            <a href="/Oxygym/pages/subs.php" class="btn-subscribe">Change Plan</a>
+            <a href="#" class="btn-logout" onclick="handleLogout(event)">Logout</a>
         </div>
 
         <div class="back-link">
@@ -253,5 +269,12 @@ $daysActive = $_SESSION['days_active'] ?? 0;
 
     </main>
 
+    <script src="assets/js/app.js"></script>
+    <script>
+        function handleLogout(event) {
+            event.preventDefault();
+            window.location.href = '/Oxygym/logout.php';
+        }
+    </script>
 </body>
 </html>

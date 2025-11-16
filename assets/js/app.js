@@ -26,9 +26,9 @@ function checkLoginStatus() {
         .catch(err => console.log('Session check failed:', err));
 }
 
-// Handle logout with page refresh
+// Handle logout
 function handleLogout(event) {
-    event.preventDefault();  // ← ADD THIS LINE
+    event.preventDefault();
     window.location.href = '/Oxygym/logout.php';
 }
 
