@@ -7,7 +7,10 @@ include('../includes/auth.php');
 // Handle subscription form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
     $plan = sanitizeInput($_POST['plan']);
-    $memberId = null;
+    
+    // Map plan name to Membership_ID
+    $planMap = ['Standard' => 1, 'Prime' => 2, 'Premium' => 3];
+    $planId = $planMap[$plan] ?? 1;
     
     // Get member ID from username
     $stmt = $conn->prepare("SELECT Member_ID FROM Users WHERE Username = ?");
@@ -24,15 +27,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
         $memberId = $row['Member_ID'];
         
         // Insert subscription record
-        $subStmt = $conn->prepare("INSERT INTO Subscription_History (Member_ID, Plan_Type, Start_Date, Status) 
-                                   VALUES (?, ?, NOW(), 'Active')");
+        $startDate = date('Y-m-d');
+        $endDate = date('Y-m-d', strtotime('+30 days'));
+        
+        $subStmt = $conn->prepare("INSERT INTO Subscription_History (Member_ID, Membership_ID, Start_Date, End_Date, Status) 
+                                   VALUES (?, ?, ?, ?, 'Active')");
         
         if ($subStmt) {
-            $subStmt->bind_param("is", $memberId, $plan);
+            $subStmt->bind_param("iiss", $memberId, $planId, $startDate, $endDate);
             $subStmt->execute();
             $subStmt->close();
             
             // Redirect to profile
+            $stmt->close();
+            $conn->close();
             header("Location: /Oxygym/profile.php");
             exit();
         }
