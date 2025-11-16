@@ -1,13 +1,3 @@
-<?php
-// Don't call session_start() - parent file handles it
-// Just check if user is authenticated
-
-if (!isset($_SESSION['username'])) {
-    header("Location: /Oxygym/Login.html");
-    exit();
-}
-?>
-<?php
 // Tab switching function
 function switchTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -96,7 +86,6 @@ if (signupForm) {
             const data = await res.json();
             
             if (res.ok && data.status === 'success') {
-                // Show username to user
                 alert(`Account created successfully!\n\nYour login details:\nUsername: ${data.user.username}\nEmail: ${data.user.email}\n\nYou can now login!`);
                 window.location.href = '/Oxygym/index.html';
             } else {
