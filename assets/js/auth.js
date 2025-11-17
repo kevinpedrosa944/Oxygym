@@ -45,7 +45,7 @@ if (loginForm) {
             
             if (res.ok && data.status === 'success') {
                 alert(data.message || 'Login successful!');
-                window.location.href = 'index.html';
+                window.location.href = '/Oxygym/index.html';
             } else {
                 loginError.textContent = data.message || 'Login failed.';
             }
@@ -86,8 +86,8 @@ if (signupForm) {
             const data = await res.json();
             
             if (res.ok && data.status === 'success') {
-                alert(data.message || 'Account created successfully!');
-                window.location.href = 'index.html';
+                alert(`Account created successfully!\n\nYour login details:\nUsername: ${data.user.username}\nEmail: ${data.user.email}\n\nYou can now login!`);
+                window.location.href = '/Oxygym/index.html';
             } else {
                 signupError.textContent = data.message || 'Sign up failed.';
             }
