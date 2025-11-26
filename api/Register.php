@@ -75,13 +75,11 @@ if (!$memberStmt->execute()) {
 $memberId = $conn->insert_id;
 $memberStmt->close();
 
-// Create user account
-$username = explode('@', $email)[0];
 $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
 $userStmt = $conn->prepare("INSERT INTO Users (Member_ID, Username, Password_Hash, Role) 
                             VALUES (?, ?, ?, 'Member')");
-$userStmt->bind_param("iss", $memberId, $username, $passwordHash);
+$userStmt->bind_param("iss", $memberId, $email, $passwordHash);
 
 if (!$userStmt->execute()) {
     http_response_code(500);
@@ -98,6 +96,6 @@ http_response_code(201);
 echo json_encode([
     'status' => 'success',
     'message' => 'Account created!',
-    'user' => ['username' => $username, 'email' => $email]
+    'user' => ['username' => $email, 'email' => $email]
 ]);
 ?>

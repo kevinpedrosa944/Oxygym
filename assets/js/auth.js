@@ -86,7 +86,7 @@ if (signupForm) {
             const data = await res.json();
             
             if (res.ok && data.status === 'success') {
-                alert(`Account created successfully!\n\nYour login details:\nUsername: ${data.user.username}\nEmail: ${data.user.email}\n\nYou can now login!`);
+                alert(`Account created successfully!\n\nYour login credentials:\nEmail: ${data.user.email}\nPassword: (the one you entered)\n\nYou can now login!`);
                 window.location.href = '/Oxygym/index.html';
             } else {
                 signupError.textContent = data.message || 'Sign up failed.';
