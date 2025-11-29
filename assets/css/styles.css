@@ -371,15 +371,18 @@ nav ul a:hover {
 
 .membership-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 40px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 25px;
     margin-bottom: 40px;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .membership-card {
     background: var(--white);
     border-radius: 12px;
-    padding: 40px 30px;
+    padding: 25px 20px;
     text-align: center;
     position: relative;
     transition: all 0.3s;
@@ -394,81 +397,83 @@ nav ul a:hover {
 
 .membership-card.featured {
     border-color: var(--gold-yellow);
-    transform: scale(1.05);
+    transform: scale(1.02);
     background: linear-gradient(135deg, rgba(255, 204, 0, 0.05) 0%, rgba(255, 165, 0, 0.05) 100%);
 }
 
 .badge {
     position: absolute;
-    top: -15px;
+    top: -12px;
     left: 50%;
     transform: translateX(-50%);
     background: var(--gold-yellow);
     color: var(--dark-text);
-    padding: 6px 16px;
+    padding: 5px 14px;
     border-radius: 20px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 700;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
 }
 
 .membership-card i {
-    font-size: 3rem;
+    font-size: 2.2rem;
     color: var(--gold-yellow);
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
 .membership-card h3 {
     color: var(--dark-text);
-    font-size: 1.8rem;
-    margin-bottom: 15px;
+    font-size: 1.4rem;
+    margin-bottom: 10px;
 }
 
 .membership-price {
-    font-size: 2.5rem;
+    font-size: 2rem;
     color: var(--gold-yellow);
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     font-weight: 700;
 }
 
 .membership-price span {
-    font-size: 1rem;
+    font-size: 0.85rem;
     color: rgba(17, 24, 39, 0.7);
 }
 
 .membership-features {
     list-style: none;
-    padding: 30px 0;
+    padding: 20px 0;
     text-align: left;
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 .membership-features li {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     color: var(--dark-text);
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 .membership-features i.fa-check {
     color: #10b981;
+    font-size: 0.85rem;
 }
 
 .membership-features i.fa-times {
     color: #ef4444;
+    font-size: 0.85rem;
 }
 
 .membership-btn {
     background: var(--dark-text);
     color: var(--white);
     border: none;
-    padding: 12px 32px;
+    padding: 10px 24px;
     border-radius: 8px;
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
     width: 100%;
@@ -505,30 +510,38 @@ nav ul a:hover {
 .contact-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 40px;
+    gap: 80px;
+    max-width: 1000px;
+    margin: 0 auto;
 }
 
 .contact-card {
-    background: var(--mid-dark-gray);
-    padding: 40px 30px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 204, 0, 0.2);
+    background: transparent;
+    padding: 30px 20px;
+    border-radius: 0;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .contact-card i {
-    font-size: 2.5rem;
+    font-size: 3rem;
     color: var(--gold-yellow);
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .contact-card h3 {
     color: var(--white);
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+    font-size: 1.3rem;
 }
 
 .contact-card p {
     color: rgba(255, 255, 255, 0.8);
     font-size: 0.95rem;
+    line-height: 1.6;
 }
 
 /* === Footer === */
