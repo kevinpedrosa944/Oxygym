@@ -1,276 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - OxyGym</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Login / Sign Up</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #3a3a40 100%);
+            font-family: 'Inter', sans-serif;
+            background-color: #e2e8f0;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             min-height: 100vh;
-            font-family: 'Poppins', sans-serif;
         }
-
-        .login-wrapper {
+        .auth-card {
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 2rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+                0 4px 6px -2px rgba(0, 0, 0, 0.05);
             width: 100%;
             max-width: 400px;
-            padding: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            background-image: linear-gradient(
+                to bottom right,
+                rgba(255, 255, 255, 0.9),
+                rgba(255, 255, 255, 0.6)
+            );
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-
-        .login-container {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-        }
-
-        .login-container h1 {
-            color: #111827;
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .input-group {
+            position: relative;
             margin-bottom: 1.5rem;
-            text-align: center;
-            font-size: 1.8rem;
+            text-align: left;
         }
-
-        .login-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-group label {
-            color: #333;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .form-group input {
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: 6px;
+        .input-group input {
+            width: 100%;
+            padding-left: 2.5rem;
+            padding-right: 1rem;
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
             font-size: 1rem;
-            font-family: inherit;
-            transition: border-color 0.3s;
+            outline-offset: 2px;
+            transition: border-color 0.2s;
         }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #ffcc00;
-            box-shadow: 0 0 5px rgba(255, 204, 0, 0.3);
+        .input-group input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
         }
-
-        .error-message {
-            color: #ef4444;
-            font-size: 0.9rem;
+        .input-group .icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            pointer-events: none;
+        }
+        button[type="submit"] {
+            width: 100%;
+            background-color: #3b82f6;
+            color: white;
+            font-weight: 600;
             padding: 0.75rem;
-            background: #fee;
-            border-radius: 6px;
-            border-left: 4px solid #ef4444;
-            display: none;
-        }
-
-        .error-message.show {
-            display: block;
-        }
-
-        .submit-btn {
-            background: linear-gradient(135deg, #ffcc00 0%, #ffa500 100%);
-            color: #111827;
-            padding: 0.75rem;
+            border-radius: 0.75rem;
+            font-size: 1.125rem;
             border: none;
-            border-radius: 6px;
-            font-weight: 600;
             cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s;
-            font-family: inherit;
+            transition: background-color 0.2s;
         }
-
-        .submit-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 204, 0, 0.3);
+        button[type="submit"]:hover { background-color: #2563eb; }
+        .error-message {
+            color: #dc2626;
+            margin-bottom: 1rem;
+            font-weight: 500;
+            min-height: 1.5rem;
+            text-align: left;
         }
-
-        .submit-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .register-link {
-            text-align: center;
-            margin-top: 1.5rem;
-            color: #666;
-        }
-
-        .register-link a {
-            color: #ffcc00;
-            font-weight: 600;
-            text-decoration: none;
-        }
-
-        .register-link a:hover {
-            text-decoration: underline;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #ffcc00;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        .back-link { text-align: center; margin-top: 1rem; }
+        .back-link a { color: #3b82f6; text-decoration: none; font-weight: 500; }
+        .back-link a:hover { text-decoration: underline; }
+        .small-link { font-size: 0.9rem; color: #374151; }
+        .small-link a { color: #3b82f6; font-weight: 600; text-decoration: none; }
     </style>
 </head>
 <body>
-    <div class="login-wrapper">
-        <div class="login-container">
-            <h1>🏋️ OxyGym Login</h1>
-            
-            <form id="loginForm" class="login-form">
-                <div id="errorMessage" class="error-message"></div>
-
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input 
-                        type="text" 
-                        id="username" 
-                        name="username" 
-                        placeholder="Enter your username" 
-                        required 
-                        autocomplete="username"
-                    >
+    <div class="auth-card">
+        <!-- LOGIN VIEW (default) -->
+        <div id="login" class="tab-content active">
+            <h1 class="text-3xl font-bold mb-2">Welcome Back</h1>
+            <p class="text-sm text-gray-500 mb-8">Login to your account</p>
+            <form id="loginForm" novalidate>
+                <div class="input-group">
+                    <i class="fas fa-envelope icon"></i>
+                    <input type="email" id="username" placeholder="Email" required />
                 </div>
-
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input 
-                        type="password" 
-                        id="password" 
-                        name="password" 
-                        placeholder="Enter your password" 
-                        required 
-                        autocomplete="current-password"
-                    >
+                <div class="input-group">
+                    <i class="fas fa-lock icon"></i>
+                    <input type="password" id="password" placeholder="Password" required />
                 </div>
-
-                <button type="submit" class="submit-btn" id="submitBtn">Login</button>
-
-                <div class="loading" id="loading">
-                    <div class="spinner"></div>
-                    <p>Logging in...</p>
-                </div>
+                <p class="small-link text-left" style="margin-bottom:10px;">
+                    Don't have an account yet? <a href="#" id="showSignup">Sign up</a>
+                </p>
+                <div id="loginError" class="error-message"></div>
+                <button type="submit">Login</button>
             </form>
+        </div>
 
-            <p class="register-link">
-                Don't have an account? <a href="/Oxygym/Register.html">Register here</a>
-            </p>
+        <!-- SIGNUP VIEW (hidden by default) -->
+        <div id="signup" class="tab-content">
+            <h1 class="text-3xl font-bold mb-2">Create Account</h1>
+            <p class="text-sm text-gray-500 mb-8">Join OxyGym today</p>
+            <form id="signupForm" novalidate>
+                <div class="input-group">
+                    <i class="fas fa-user icon"></i>
+                    <input type="text" id="signupFirstName" placeholder="First Name" required />
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-user icon"></i>
+                    <input type="text" id="signupLastName" placeholder="Last Name" required />
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-envelope icon"></i>
+                    <input type="email" id="signupEmail" placeholder="Email" required />
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock icon"></i>
+                    <input type="password" id="signupPassword" placeholder="Password" required />
+                </div>
+                <div id="signupError" class="error-message"></div>
+                <button type="submit">Sign Up</button>
+            </form>
+        </div>
+
+        <div class="back-link">
+            <a href="index.html">← Back to Home</a>
         </div>
     </div>
 
-    <script>
-        const loginForm = document.getElementById('loginForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const errorDiv = document.getElementById('errorMessage');
-        const loadingDiv = document.getElementById('loading');
-        const usernameInput = document.getElementById('username');
-        const passwordInput = document.getElementById('password');
-
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const username = usernameInput.value.trim();
-            const password = passwordInput.value;
-
-            // Validation
-            if (!username || !password) {
-                showError('Please fill in all fields');
-                return;
-            }
-
-            // Clear error
-            errorDiv.classList.remove('show');
-            errorDiv.textContent = '';
-
-            // Show loading
-            submitBtn.style.display = 'none';
-            loadingDiv.style.display = 'block';
-
-            try {
-                console.log('📤 Sending login request...');
-                
-                const response = await fetch('/Oxygym/api/Login.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ username, password })
-                });
-
-                console.log('📊 Response status:', response.status);
-
-                const data = await response.json();
-                console.log('📦 Response data:', data);
-
-                if (!response.ok || !data.success) {
-                    throw new Error(data.error || 'Login failed');
-                }
-
-                console.log('✅ Login successful!');
-                console.log('🔗 Redirecting to:', data.redirect);
-
-                // Redirect
-                window.location.href = data.redirect;
-
-            } catch (error) {
-                console.error('❌ Login error:', error);
-                showError(error.message || 'An error occurred. Please try again.');
-                submitBtn.style.display = 'block';
-                loadingDiv.style.display = 'none';
-            }
-        });
-
-        function showError(message) {
-            errorDiv.textContent = message;
-            errorDiv.classList.add('show');
-        }
-
-        // Clear error when typing
-        usernameInput.addEventListener('input', () => {
-            errorDiv.classList.remove('show');
-        });
-
-        passwordInput.addEventListener('input', () => {
-            errorDiv.classList.remove('show');
-        });
-    </script>
+    <script src="assets/js/auth.js"></script>
 </body>
 </html>
-

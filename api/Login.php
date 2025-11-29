@@ -1,4 +1,6 @@
 <?php
+// filepath: c:\xampp\htdocs\Oxygym\api\Login.php
+
 header('Content-Type: application/json');
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -8,32 +10,26 @@ if (session_status() === PHP_SESSION_NONE) {
 include('../includes/db_connect.php');
 
 try {
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        http_response_code(405);
-        echo json_encode(['error' => 'Method not allowed']);
-        exit();
-    }
-
     $input = file_get_contents('php://input');
     $data = json_decode($input, true);
 
-    if (!$data || !isset($data['username']) || !isset($data['password'])) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Username and password required']);
-        exit();
-    }
-
-    $username = trim($data['username']);
-    $password = trim($data['password']);
+    $username = $data['username'] ?? '';
+    $password = $data['password'] ?? '';
 
     if (empty($username) || empty($password)) {
         http_response_code(400);
-        echo json_encode(['error' => 'Username and password cannot be empty']);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Email and password are required'
+        ]);
         exit();
     }
 
-    // Query user
-    $stmt = $conn->prepare("
+    error_log("=== LOGIN ATTEMPT ===");
+    error_log("Username/Email: $username");
+
+    // Query users table
+    $userQuery = $conn->prepare("
         SELECT 
             User_ID,
             Username,
@@ -45,93 +41,146 @@ try {
         LIMIT 1
     ");
 
-    if (!$stmt) {
-        throw new Exception($conn->error);
+    if (!$userQuery) {
+        error_log("Query prepare error: " . $conn->error);
+        throw new Exception('Database error: ' . $conn->error);
     }
 
-    $stmt->bind_param("s", $username);
-    
-    if (!$stmt->execute()) {
-        throw new Exception($stmt->error);
+    $userQuery->bind_param("s", $username);
+    if (!$userQuery->execute()) {
+        error_log("Query execute error: " . $userQuery->error);
+        throw new Exception('Query error: ' . $userQuery->error);
     }
 
-    $result = $stmt->get_result();
+    $result = $userQuery->get_result();
 
     if ($result->num_rows === 0) {
-        $stmt->close();
-        $conn->close();
+        error_log("User not found: $username");
         http_response_code(401);
-        echo json_encode(['error' => 'Invalid username or password']);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Invalid email or password'
+        ]);
+        $userQuery->close();
+        $conn->close();
         exit();
     }
 
     $user = $result->fetch_assoc();
-    $stmt->close();
+    $userQuery->close();
+
+    error_log("User found: " . $user['Username'] . ", Role: " . $user['Role']);
 
     // Verify password
     if (!password_verify($password, $user['Password_Hash'])) {
-        $conn->close();
+        error_log("Password verification FAILED for: $username");
         http_response_code(401);
-        echo json_encode(['error' => 'Invalid username or password']);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Invalid email or password'
+        ]);
+        $conn->close();
         exit();
     }
 
-    // Set session variables
-    $_SESSION['user_id'] = (int)$user['User_ID'];
-    $_SESSION['username'] = $user['Username'];
-    $_SESSION['role'] = $user['Role'];
-    $_SESSION['member_id'] = $user['Member_ID'] ? (int)$user['Member_ID'] : null;
+    error_log("Password verification PASSED");
 
-    // Get member details if available
+    // Get member details
+    $memberInfo = [
+        'First_Name' => '',
+        'Last_Name' => '',
+        'Email' => $username
+    ];
+
     if ($user['Member_ID']) {
         $memberStmt = $conn->prepare("
-            SELECT First_Name, Last_Name, Email, Phone
-            FROM members
+            SELECT First_Name, Last_Name, Email
+            FROM members 
             WHERE Member_ID = ?
-            LIMIT 1
         ");
+        $memberStmt->bind_param("i", $user['Member_ID']);
+        $memberStmt->execute();
+        $memberResult = $memberStmt->get_result();
+        if ($memberResult->num_rows > 0) {
+            $memberInfo = $memberResult->fetch_assoc();
+            error_log("Member info: " . $memberInfo['First_Name'] . " " . $memberInfo['Last_Name']);
+        }
+        $memberStmt->close();
+    }
 
-        if ($memberStmt) {
-            $memberStmt->bind_param("i", $user['Member_ID']);
-            $memberStmt->execute();
-            $memberResult = $memberStmt->get_result();
+    // Set session variables
+    $_SESSION['user_id'] = $user['User_ID'];
+    $_SESSION['username'] = $user['Username'];
+    $_SESSION['role'] = $user['Role'];
+    $_SESSION['member_id'] = $user['Member_ID'];
+    $_SESSION['first_name'] = $memberInfo['First_Name'] ?? '';
+    $_SESSION['last_name'] = $memberInfo['Last_Name'] ?? '';
+    $_SESSION['email'] = $memberInfo['Email'] ?? $username;
 
-            if ($memberResult->num_rows > 0) {
-                $member = $memberResult->fetch_assoc();
-                $_SESSION['first_name'] = $member['First_Name'];
-                $_SESSION['last_name'] = $member['Last_Name'];
-                $_SESSION['email'] = $member['Email'];
-                $_SESSION['phone'] = $member['Phone'];
+    error_log("Session variables set");
+    error_log("Role: " . $_SESSION['role']);
+    error_log("Member ID: " . $_SESSION['member_id']);
+
+    // Determine redirect
+    $redirect = '/Oxygym/index.html';
+
+    if ($user['Role'] === 'Admin') {
+        $redirect = '/Oxygym/adminDashboard.html';
+        error_log("Admin detected - redirecting to: $redirect");
+    } elseif ($user['Role'] === 'Staff') {
+        $redirect = '/Oxygym/api/staff/dashboard.php';
+        error_log("Staff detected - redirecting to: $redirect");
+    } elseif ($user['Role'] === 'Member') {
+        error_log("Member detected - checking subscription...");
+        
+        if ($user['Member_ID']) {
+            $subStmt = $conn->prepare("
+                SELECT Subscription_ID FROM subscription_history 
+                WHERE Member_ID = ? AND Status = 'Active'
+                LIMIT 1
+            ");
+            $subStmt->bind_param("i", $user['Member_ID']);
+            $subStmt->execute();
+            $subResult = $subStmt->get_result();
+            
+            if ($subResult->num_rows > 0) {
+                $redirect = '/Oxygym/profile.php';
+                error_log("Active subscription found - redirecting to: $redirect");
+            } else {
+                $redirect = '/Oxygym/pages/subs.php';
+                error_log("No active subscription - redirecting to: $redirect");
             }
-            $memberStmt->close();
+            $subStmt->close();
+        } else {
+            $redirect = '/Oxygym/pages/subs.php';
+            error_log("No member ID - redirecting to: $redirect");
         }
     }
 
-    // Determine redirect based on role
-    $redirect = '/Oxygym/profile.html';
-    if ($user['Role'] === 'Admin') {
-        $redirect = '/Oxygym/adminDashboard.html';
-    } elseif ($user['Role'] === 'Staff') {
-        $redirect = '/Oxygym/staffDashboard.html';
-    }
+    error_log("Final redirect URL: $redirect");
+    error_log("=== LOGIN SUCCESS ===");
 
-    // Write session before closing connection
-    session_write_close();
-    $conn->close();
-
-    // Return JSON response
     http_response_code(200);
     echo json_encode([
         'success' => true,
         'message' => 'Login successful',
         'redirect' => $redirect,
-        'role' => $user['Role'],
-        'username' => $user['Username']
+        'user' => [
+            'username' => $user['Username'],
+            'role' => $user['Role'],
+            'name' => trim(($memberInfo['First_Name'] ?? '') . ' ' . ($memberInfo['Last_Name'] ?? ''))
+        ]
     ]);
 
 } catch (Exception $e) {
+    error_log("=== LOGIN ERROR ===");
+    error_log("Error: " . $e->getMessage());
     http_response_code(500);
-    error_log("Login error: " . $e->getMessage());
-    echo json_encode(['error' => 'Server error: ' . $e->getMessage()]);
+    echo json_encode([
+        'success' => false,
+        'error' => $e->getMessage()
+    ]);
 }
+
+$conn->close();
 ?>
