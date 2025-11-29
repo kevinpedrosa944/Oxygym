@@ -1,6 +1,6 @@
 // Check if user is logged in and update button
 function checkLoginStatus() {
-    fetch('/Oxygym/check_session.php')
+fetch('/Oxygym/api/check_session.php')
         .then(res => res.json())
         .then(data => {
             const authButtons = document.getElementById('authButtons');
@@ -34,7 +34,7 @@ function subscribePlan(plan) {
 }
 
 function checkLoginAndRedirect(redirectUrl) {
-    fetch('/Oxygym/check_session.php')
+    fetch('/Oxygym/api/check_session.php')
         .then(res => res.json())
         .then(data => {
             window.location.href = data.loggedIn ? redirectUrl : '/Oxygym/Login.html';
