@@ -43,11 +43,14 @@ if (loginForm) {
             
             const data = await res.json();
             
-            if (res.ok && data.status === 'success') {
-                alert(data.message || 'Login successful!');
-                window.location.href = '/Oxygym/index.html';
+            console.log('Login response:', data);
+            
+            if (res.ok && data.success) {
+                console.log('Login successful, redirecting to:', data.redirect);
+                // Use window.location.href for guaranteed redirect
+                window.location.href = data.redirect;
             } else {
-                loginError.textContent = data.message || 'Login failed.';
+                loginError.textContent = data.error || data.message || 'Login failed.';
             }
         } catch (error) {
             loginError.textContent = 'Network error: ' + error.message;
@@ -67,6 +70,7 @@ if (signupForm) {
         const firstName = document.getElementById('signupFirstName').value.trim();
         const lastName = document.getElementById('signupLastName').value.trim();
         const email = document.getElementById('signupEmail').value.trim();
+        const username = firstName.toLowerCase() + lastName.toLowerCase();
         const password = document.getElementById('signupPassword').value;
         
         signupError.textContent = '';
@@ -76,20 +80,34 @@ if (signupForm) {
             return;
         }
         
+        if (password.length < 6) {
+            signupError.textContent = 'Password must be at least 6 characters.';
+            return;
+        }
+        
         try {
             const res = await fetch('/Oxygym/api/Register.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ firstName, lastName, email, password })
+                body: JSON.stringify({ 
+                    firstName, 
+                    lastName, 
+                    email, 
+                    username,
+                    password 
+                })
             });
             
             const data = await res.json();
             
-            if (res.ok && data.status === 'success') {
-                alert(`Account created successfully!\n\nYour login credentials:\nEmail: ${data.user.email}\nPassword: (the one you entered)\n\nYou can now login!`);
-                window.location.href = '/Oxygym/index.html';
+            console.log('Register response:', data);
+            
+            if (res.ok && data.success) {
+                alert('Account created successfully! Redirecting to profile...');
+                console.log('Registration successful, redirecting to:', data.redirect);
+                window.location.href = data.redirect;
             } else {
-                signupError.textContent = data.message || 'Sign up failed.';
+                signupError.textContent = data.error || data.message || 'Sign up failed.';
             }
         } catch (error) {
             signupError.textContent = 'Network error: ' + error.message;

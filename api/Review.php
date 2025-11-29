@@ -2,16 +2,15 @@
 // filepath: c:\xampp\htdocs\Oxygym\api\Review.php
 
 header('Content-Type: application/json');
-session_start();
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 include('../includes/db_connect.php');
 include('../includes/auth.php');
 
-if (!isset($_SESSION['username']) || !isset($_SESSION['member_id'])) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit();
-}
+checkAuth();
 
 $method = $_SERVER['REQUEST_METHOD'];
 $memberId = $_SESSION['member_id'];
@@ -29,16 +28,12 @@ try {
                 r.Created_At,
                 m.First_Name,
                 m.Last_Name
-            FROM Reviews r
-            JOIN Members m ON r.Member_ID = m.Member_ID
+            FROM reviews r
+            JOIN members m ON r.Member_ID = m.Member_ID
             WHERE r.Member_ID = ?
             ORDER BY r.Created_At DESC
         ");
         
-        if (!$query) {
-            throw new Exception('Database error: ' . $conn->error);
-        }
-
         $query->bind_param("i", $memberId);
         $query->execute();
         $result = $query->get_result();
@@ -86,28 +81,20 @@ try {
             exit();
         }
 
-        if (strlen($body) < 10 || strlen($body) > 2000) {
+        if (strlen($body) < 10) {
             http_response_code(400);
-            echo json_encode(['error' => 'Review must be 10-2000 characters']);
+            echo json_encode(['error' => 'Review must be at least 10 characters']);
             exit();
         }
 
         // Insert review
         $insertQuery = $conn->prepare("
-            INSERT INTO Reviews (Member_ID, Rating, Title, Body, Created_At)
+            INSERT INTO reviews (Member_ID, Rating, Title, Body, Created_At)
             VALUES (?, ?, ?, ?, NOW())
         ");
 
-        if (!$insertQuery) {
-            throw new Exception('Database error: ' . $conn->error);
-        }
-
         $insertQuery->bind_param("iiss", $memberId, $rating, $title, $body);
-        
-        if (!$insertQuery->execute()) {
-            throw new Exception('Failed to create review: ' . $insertQuery->error);
-        }
-
+        $insertQuery->execute();
         $reviewId = $insertQuery->insert_id;
         $insertQuery->close();
         
@@ -123,15 +110,15 @@ try {
         $data = json_decode(file_get_contents('php://input'), true);
         $reviewId = $data['id'] ?? null;
 
-        if (!$reviewId || !isset($data['rating']) || !isset($data['title']) || !isset($data['body'])) {
+        if (!$reviewId) {
             http_response_code(400);
-            echo json_encode(['error' => 'Missing required fields']);
+            echo json_encode(['error' => 'Review ID required']);
             exit();
         }
 
-        // Check if review belongs to current user
+        // Check ownership
         $checkQuery = $conn->prepare("
-            SELECT Review_ID FROM Reviews 
+            SELECT Review_ID FROM reviews 
             WHERE Review_ID = ? AND Member_ID = ?
         ");
         $checkQuery->bind_param("ii", $reviewId, $memberId);
@@ -150,22 +137,15 @@ try {
         $body = trim($data['body']);
 
         $updateQuery = $conn->prepare("
-            UPDATE Reviews 
-            SET Rating = ?, Title = ?, Body = ?
-            WHERE Review_ID = ? AND Member_ID = ?
+            UPDATE reviews 
+            SET Rating = ?, Title = ?, Body = ?, Updated_At = NOW()
+            WHERE Review_ID = ?
         ");
 
-        if (!$updateQuery) {
-            throw new Exception('Database error: ' . $conn->error);
-        }
-
-        $updateQuery->bind_param("issii", $rating, $title, $body, $reviewId, $memberId);
-        
-        if (!$updateQuery->execute()) {
-            throw new Exception('Failed to update review: ' . $updateQuery->error);
-        }
-
+        $updateQuery->bind_param("issi", $rating, $title, $body, $reviewId);
+        $updateQuery->execute();
         $updateQuery->close();
+
         echo json_encode(['success' => true, 'message' => 'Review updated']);
 
     } elseif ($method === 'DELETE') {
@@ -179,9 +159,9 @@ try {
             exit();
         }
 
-        // Check if review belongs to current user
+        // Check ownership
         $checkQuery = $conn->prepare("
-            SELECT Review_ID FROM Reviews 
+            SELECT Review_ID FROM reviews 
             WHERE Review_ID = ? AND Member_ID = ?
         ");
         $checkQuery->bind_param("ii", $reviewId, $memberId);
@@ -196,27 +176,22 @@ try {
         $checkQuery->close();
 
         $deleteQuery = $conn->prepare("
-            DELETE FROM Reviews 
-            WHERE Review_ID = ? AND Member_ID = ?
+            DELETE FROM reviews 
+            WHERE Review_ID = ?
         ");
 
-        if (!$deleteQuery) {
-            throw new Exception('Database error: ' . $conn->error);
-        }
-
-        $deleteQuery->bind_param("ii", $reviewId, $memberId);
-        
-        if (!$deleteQuery->execute()) {
-            throw new Exception('Failed to delete review: ' . $deleteQuery->error);
-        }
-
+        $deleteQuery->bind_param("i", $reviewId);
+        $deleteQuery->execute();
         $deleteQuery->close();
+
         echo json_encode(['success' => true, 'message' => 'Review deleted']);
     }
 
 } catch (Exception $e) {
     http_response_code(500);
-    error_log("Review API error: " . $e->getMessage());
+    error_log("Review error: " . $e->getMessage());
     echo json_encode(['error' => $e->getMessage()]);
 }
+
+$conn->close();
 ?>
