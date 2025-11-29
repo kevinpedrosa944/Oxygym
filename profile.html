@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <title>My Profile - OxyGym</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/profile.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container nav-container">
+            <h1 class="logo">🏋️ OXYGYM</h1>
+            <nav>
+                <ul>
+                    <li><a href="/Oxygym/index.html#about-section">About</a></li>
+                    <li><a href="/Oxygym/index.html#plan-section">Plans</a></li>
+                </ul>
+            </nav>
+            <div id="authButtons">
+                <a href="#" class="register-btn" onclick="handleLogout(event)">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="profile-container">
+        
+        <!-- Profile Header -->
+        <section class="profile-header">
+            <div class="profile-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="profile-info">
+                <h1 id="memberName">Loading...</h1>
+                <p id="memberEmail">Loading...</p>
+            </div>
+        </section>
+
+        <!-- Subscription Status Warning -->
+        <div id="warningBanner" class="warning-banner" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span id="warningText">Your subscription expires soon.</span>
+            <a href="/Oxygym/pages/subs.php" style="color: #92400e; font-weight: bold; margin-left: auto;">Renew now</a>
+        </div>
+
+        <!-- Personal Information -->
+        <section class="info-section">
+            <h2><i class="fas fa-user-circle"></i> Personal Information</h2>
+            <div class="details-grid" id="personalInfo">
+                <!-- Populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Subscription Information -->
+        <section class="info-section">
+            <h2><i class="fas fa-receipt"></i> Subscription Information</h2>
+            
+            <div class="subscription-section">
+                <h3 id="planName">Loading...</h3>
+                <div class="subscription-grid" id="subscriptionStats">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="details-grid" id="subscriptionDetails">
+                <!-- Populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Reviews Section -->
+        <section class="info-section">
+            <h2><i class="fas fa-star"></i> Your Reviews</h2>
+            
+            <div class="reviews-container">
+                <button class="btn btn-primary" id="addReviewBtn">
+                    <i class="fas fa-plus"></i> Write a Review
+                </button>
+
+                <div id="reviewsList" class="reviews-list">
+                    <!-- Populated by JavaScript -->
+                </div>
+
+                <!-- Review Modal -->
+                <div id="reviewModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>Write a Review</h2>
+                            <button class="close-btn">&times;</button>
+                        </div>
+                        <form id="reviewForm" method="POST">
+                            <div class="form-group">
+                                <label>Rating</label>
+                                <div class="rating-input">
+                                    <input type="radio" name="rating" value="5" id="star5">
+                                    <label for="star5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" name="rating" value="4" id="star4">
+                                    <label for="star4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" name="rating" value="3" id="star3">
+                                    <label for="star3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" name="rating" value="2" id="star2">
+                                    <label for="star2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" name="rating" value="1" id="star1">
+                                    <label for="star1"><i class="fas fa-star"></i></label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="reviewTitle">Review Title</label>
+                                <input type="text" id="reviewTitle" name="title" placeholder="Sum up your experience..." required>
+                            </div>
+                            <div class="form-group">
+                                <label for="reviewBody">Your Review</label>
+                                <textarea id="reviewBody" name="body" rows="5" placeholder="Share your experience..." required></textarea>
+                            </div>
+                            <div class="modal-actions">
+                                <button type="button" class="btn" id="cancelReviewBtn">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Post Review</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <a href="/Oxygym/pages/subs.php" class="btn btn-primary">
+                <i class="fas fa-sync-alt"></i> Change Plan
+            </a>
+            <a href="/Oxygym/pages/subs.php" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Renew Subscription
+            </a>
+            <a href="#" class="btn btn-danger" onclick="handleLogout(event)">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+
+        <div class="back-link">
+            <a href="/Oxygym/index.html">← Back to Home</a>
+        </div>
+
+    </main>
+
+    <script src="assets/js/profile.js"></script>
+</body>
+</html>
