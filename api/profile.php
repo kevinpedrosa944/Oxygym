@@ -2,7 +2,10 @@
 // filepath: c:\xampp\htdocs\Oxygym\api\profile.php
 
 header('Content-Type: application/json');
-session_start();
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 include('../includes/db_connect.php');
 include('../includes/auth.php');
@@ -23,19 +26,17 @@ try {
         exit();
     }
 
-    // Get member details
+    // Get member details - use lowercase table names
     $memberQuery = $conn->prepare("
         SELECT 
-            m.Member_ID,
-            m.First_Name,
-            m.Last_Name,
-            m.Email,
-            m.Phone,
-            m.Gender,
-            m.Birthdate,
-            m.Join_Date
-        FROM Members m
-        WHERE m.Member_ID = ?
+            Member_ID,
+            First_Name,
+            Last_Name,
+            Email,
+            Phone,
+            Join_Date
+        FROM members
+        WHERE Member_ID = ?
         LIMIT 1
     ");
 
@@ -50,24 +51,25 @@ try {
     if ($result->num_rows === 0) {
         http_response_code(404);
         echo json_encode(['error' => 'Member not found']);
+        $memberQuery->close();
+        $conn->close();
         exit();
     }
 
     $member = $result->fetch_assoc();
     $memberQuery->close();
 
-    // Get subscription details
+    // Get subscription details - use lowercase table names
     $subQuery = $conn->prepare("
         SELECT 
             sh.Subscription_ID,
             mt.Name as Plan_Name,
             mt.Price,
-            mt.Duration_Days,
             sh.Start_Date,
             sh.End_Date,
             sh.Status
-        FROM Subscription_History sh
-        JOIN Membership_Types mt ON sh.Membership_ID = mt.Membership_ID
+        FROM subscription_history sh
+        JOIN membership_types mt ON sh.Membership_ID = mt.Membership_ID
         WHERE sh.Member_ID = ? AND sh.Status = 'Active'
         ORDER BY sh.Start_Date DESC
         LIMIT 1
@@ -103,40 +105,33 @@ try {
         $daysActive = $today->diff($joinDateTime)->days;
     }
 
-    $age = 0;
-    if ($member['Birthdate']) {
-        $birthdateObj = new DateTime($member['Birthdate']);
-        $age = $today->diff($birthdateObj)->y;
-    }
-
-    $response = [
-        'member' => [
-            'firstName' => $member['First_Name'] ?? 'N/A',
-            'lastName' => $member['Last_Name'] ?? 'N/A',
+    http_response_code(200);
+    echo json_encode([
+        'success' => true,
+        'profile' => [
+            'member_id' => (int)$member['Member_ID'],
+            'first_name' => $member['First_Name'] ?? 'N/A',
+            'last_name' => $member['Last_Name'] ?? 'N/A',
             'email' => $member['Email'] ?? 'N/A',
             'phone' => $member['Phone'] ?? 'Not provided',
-            'gender' => $member['Gender'] ?? 'Not specified',
-            'birthdate' => $member['Birthdate'] ? (new DateTime($member['Birthdate']))->format('M d, Y') : 'Not provided',
-            'age' => $age,
-            'joinDate' => $member['Join_Date'] ? (new DateTime($member['Join_Date']))->format('M d, Y') : 'N/A',
-            'daysActive' => $daysActive
+            'join_date' => $member['Join_Date'] ?? 'N/A',
+            'days_active' => $daysActive
         ],
         'subscription' => [
-            'planName' => $subscription['Plan_Name'] ?? 'No Active Plan',
-            'price' => $subscription['Price'] ?? 0,
-            'duration' => $subscription['Duration_Days'] ?? 30,
-            'startDate' => $startDate,
-            'endDate' => $endDate,
-            'daysRemaining' => $daysRemaining,
+            'plan_name' => $subscription['Plan_Name'] ?? 'No Active Plan',
+            'price' => (float)($subscription['Price'] ?? 0),
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'days_remaining' => $daysRemaining,
             'status' => $subscription['Status'] ?? 'Inactive'
         ]
-    ];
-
-    echo json_encode($response);
+    ]);
 
 } catch (Exception $e) {
     http_response_code(500);
     error_log("Profile error: " . $e->getMessage());
     echo json_encode(['error' => $e->getMessage()]);
 }
+
+$conn->close();
 ?>

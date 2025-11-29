@@ -1,6 +1,4 @@
 <?php
-// filepath: c:\xampp\htdocs\Oxygym\api\Login.php
-
 header('Content-Type: application/json');
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -8,14 +6,16 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 include('../includes/db_connect.php');
-include('../includes/auth.php');
 
 try {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        echo json_encode(['error' => 'Method not allowed']);
+        exit();
+    }
+
     $input = file_get_contents('php://input');
     $data = json_decode($input, true);
-
-    // Log the attempt
-    error_log("Login attempt for: " . ($data['username'] ?? 'unknown'));
 
     if (!$data || !isset($data['username']) || !isset($data['password'])) {
         http_response_code(400);
@@ -32,9 +32,7 @@ try {
         exit();
     }
 
-    error_log("Querying user: $username");
-
-    // Query with lowercase table name
+    // Query user
     $stmt = $conn->prepare("
         SELECT 
             User_ID,
@@ -48,54 +46,41 @@ try {
     ");
 
     if (!$stmt) {
-        http_response_code(500);
-        error_log("Prepare error: " . $conn->error);
-        echo json_encode(['error' => 'Database error: ' . $conn->error]);
-        exit();
+        throw new Exception($conn->error);
     }
 
     $stmt->bind_param("s", $username);
     
     if (!$stmt->execute()) {
-        http_response_code(500);
-        error_log("Execute error: " . $stmt->error);
-        echo json_encode(['error' => 'Database error: ' . $stmt->error]);
-        $stmt->close();
-        exit();
+        throw new Exception($stmt->error);
     }
 
     $result = $stmt->get_result();
 
     if ($result->num_rows === 0) {
-        error_log("User not found: $username");
+        $stmt->close();
+        $conn->close();
         http_response_code(401);
         echo json_encode(['error' => 'Invalid username or password']);
-        $stmt->close();
         exit();
     }
 
     $user = $result->fetch_assoc();
     $stmt->close();
 
-    error_log("User found: " . $user['Username'] . " with role: " . $user['Role']);
-
     // Verify password
     if (!password_verify($password, $user['Password_Hash'])) {
-        error_log("Password verification failed for: $username");
+        $conn->close();
         http_response_code(401);
         echo json_encode(['error' => 'Invalid username or password']);
         exit();
     }
-
-    error_log("Password verified for: $username");
 
     // Set session variables
     $_SESSION['user_id'] = (int)$user['User_ID'];
     $_SESSION['username'] = $user['Username'];
     $_SESSION['role'] = $user['Role'];
     $_SESSION['member_id'] = $user['Member_ID'] ? (int)$user['Member_ID'] : null;
-
-    error_log("Session set - User: {$_SESSION['username']}, Role: {$_SESSION['role']}");
 
     // Get member details if available
     if ($user['Member_ID']) {
@@ -117,9 +102,7 @@ try {
                 $_SESSION['last_name'] = $member['Last_Name'];
                 $_SESSION['email'] = $member['Email'];
                 $_SESSION['phone'] = $member['Phone'];
-                error_log("Member details loaded: {$member['First_Name']} {$member['Last_Name']}");
             }
-            $memberResult->free();
             $memberStmt->close();
         }
     }
@@ -132,10 +115,11 @@ try {
         $redirect = '/Oxygym/staffDashboard.html';
     }
 
-    error_log("Redirect URL: $redirect");
-
+    // Write session before closing connection
     session_write_close();
+    $conn->close();
 
+    // Return JSON response
     http_response_code(200);
     echo json_encode([
         'success' => true,
@@ -145,13 +129,9 @@ try {
         'username' => $user['Username']
     ]);
 
-    error_log("Login successful for: {$user['Username']}");
-
 } catch (Exception $e) {
     http_response_code(500);
-    error_log("Login exception: " . $e->getMessage());
+    error_log("Login error: " . $e->getMessage());
     echo json_encode(['error' => 'Server error: ' . $e->getMessage()]);
 }
-
-$conn->close();
 ?>

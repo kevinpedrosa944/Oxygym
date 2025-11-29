@@ -8,19 +8,19 @@
     <title>My Profile - OxyGym</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/profile.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/Oxygym/assets/css/profile.css">
 </head>
 <body>
     <!-- Header -->
     <header>
-        <div class="container nav-container">
+        <div class="nav-container">
             <h1 class="logo">🏋️ OXYGYM</h1>
             <nav>
                 <ul>
-                    <li><a href="/Oxygym/index.html#about-section">About</a></li>
-                    <li><a href="/Oxygym/index.html#plan-section">Plans</a></li>
+                    <li><a href="/Oxygym/index.html">Home</a></li>
+                    <li><a href="/Oxygym/pages/subs.php">Subscriptions</a></li>
                 </ul>
             </nav>
             <div id="authButtons">
@@ -46,14 +46,14 @@
         <div id="warningBanner" class="warning-banner" style="display: none;">
             <i class="fas fa-exclamation-triangle"></i>
             <span id="warningText">Your subscription expires soon.</span>
-            <a href="/Oxygym/pages/subs.php" style="color: #92400e; font-weight: bold; margin-left: auto;">Renew now</a>
+            <a href="/Oxygym/pages/subs.php">Renew now</a>
         </div>
 
         <!-- Personal Information -->
         <section class="info-section">
             <h2><i class="fas fa-user-circle"></i> Personal Information</h2>
             <div class="details-grid" id="personalInfo">
-                <!-- Populated by JavaScript -->
+                <p style="color: #999;">Loading...</p>
             </div>
         </section>
 
@@ -64,12 +64,12 @@
             <div class="subscription-section">
                 <h3 id="planName">Loading...</h3>
                 <div class="subscription-grid" id="subscriptionStats">
-                    <!-- Populated by JavaScript -->
+                    <p style="color: #999;">Loading...</p>
                 </div>
             </div>
 
             <div class="details-grid" id="subscriptionDetails">
-                <!-- Populated by JavaScript -->
+                <p style="color: #999;">Loading...</p>
             </div>
         </section>
 
@@ -83,7 +83,7 @@
                 </button>
 
                 <div id="reviewsList" class="reviews-list">
-                    <!-- Populated by JavaScript -->
+                    <p style="color: #999; text-align: center; padding: 2rem;">Loading reviews...</p>
                 </div>
 
                 <!-- Review Modal -->
@@ -91,7 +91,7 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h2>Write a Review</h2>
-                            <button class="close-btn">&times;</button>
+                            <button class="close-btn" type="button">&times;</button>
                         </div>
                         <form id="reviewForm" method="POST">
                             <div class="form-group">
@@ -115,7 +115,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="reviewBody">Your Review</label>
-                                <textarea id="reviewBody" name="body" rows="5" placeholder="Share your experience..." required></textarea>
+                                <textarea id="reviewBody" name="body" placeholder="Share your experience..." required></textarea>
                             </div>
                             <div class="modal-actions">
                                 <button type="button" class="btn" id="cancelReviewBtn">Cancel</button>
@@ -146,6 +146,6 @@
 
     </main>
 
-    <script src="assets/js/profile.js"></script>
+    <script src="/Oxygym/assets/js/profile.js"></script>
 </body>
 </html>
