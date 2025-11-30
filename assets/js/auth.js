@@ -43,11 +43,30 @@ if (loginForm) {
             
             const data = await res.json();
             
-            if (res.ok && data.status === 'success') {
-                alert(data.message || 'Login successful!');
-                window.location.href = '/Oxygym/index.html';
+            console.log('Login response:', data);
+            
+            if (res.ok && data.success) {
+                console.log('✅ Login successful');
+                console.log('Redirect URL:', data.redirect);
+                
+                // Convert relative path to absolute URL
+                let redirectUrl = data.redirect;
+                
+                // If redirect doesn't start with http, make it absolute
+                if (!redirectUrl.startsWith('http')) {
+                    // Handle both /Oxygym/... and api/admin/... paths
+                    if (redirectUrl.startsWith('/')) {
+                        redirectUrl = window.location.origin + redirectUrl;
+                    } else {
+                        redirectUrl = window.location.origin + '/Oxygym/' + redirectUrl;
+                    }
+                }
+                
+                console.log('Final redirect URL:', redirectUrl);
+                window.location.href = redirectUrl;
             } else {
-                loginError.textContent = data.message || 'Login failed.';
+                loginError.textContent = data.error || data.message || 'Login failed.';
+                console.error('Login error:', data.error);
             }
         } catch (error) {
             loginError.textContent = 'Network error: ' + error.message;
@@ -76,20 +95,54 @@ if (signupForm) {
             return;
         }
         
+        if (password.length < 6) {
+            signupError.textContent = 'Password must be at least 6 characters.';
+            return;
+        }
+        
+        if (!email.includes('@')) {
+            signupError.textContent = 'Please enter a valid email.';
+            return;
+        }
+        
         try {
             const res = await fetch('/Oxygym/api/Register.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ firstName, lastName, email, password })
+                body: JSON.stringify({ 
+                    firstName, 
+                    lastName, 
+                    email, 
+                    password 
+                })
             });
             
             const data = await res.json();
             
-            if (res.ok && data.status === 'success') {
-                alert(`Account created successfully!\n\nYour login credentials:\nEmail: ${data.user.email}\nPassword: (the one you entered)\n\nYou can now login!`);
-                window.location.href = '/Oxygym/index.html';
+            console.log('Registration response:', data);
+            
+            if (res.ok && data.success) {
+                console.log('✅ Registration successful');
+                console.log('Redirect URL:', data.redirect);
+                
+                // Convert relative path to absolute URL
+                let redirectUrl = data.redirect;
+                
+                // If redirect doesn't start with http, make it absolute
+                if (!redirectUrl.startsWith('http')) {
+                    // Handle both /Oxygym/... and api/admin/... paths
+                    if (redirectUrl.startsWith('/')) {
+                        redirectUrl = window.location.origin + redirectUrl;
+                    } else {
+                        redirectUrl = window.location.origin + '/Oxygym/' + redirectUrl;
+                    }
+                }
+                
+                console.log('Final redirect URL:', redirectUrl);
+                window.location.href = redirectUrl;
             } else {
-                signupError.textContent = data.message || 'Sign up failed.';
+                signupError.textContent = data.error || data.message || 'Sign up failed.';
+                console.error('Registration error:', data.error);
             }
         } catch (error) {
             signupError.textContent = 'Network error: ' + error.message;
