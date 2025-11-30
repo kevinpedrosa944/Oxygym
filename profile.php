@@ -22,7 +22,7 @@ $memberQuery = $conn->prepare("
         sh.Status as Subscription_Status
     FROM Users u
     LEFT JOIN Members m ON u.Member_ID = m.Member_ID
-    LEFT JOIN Subscription_History sh ON m.Member_ID = sh.Member_ID AND sh.Status = 'Active'
+    LEFT JOIN Subscription_History sh ON m.Member_ID = sh.Member_ID AND sh.Status = 'Active'AND sh.Start_Date <= CURDATE() AND sh.End_Date >= CURDATE()
     LEFT JOIN Membership_Types mt ON sh.Membership_ID = mt.Membership_ID
     WHERE u.Username = ?
     LIMIT 1
@@ -84,7 +84,6 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <title>My Profile - OxyGym</title>
-    <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         .profile-container {
@@ -296,10 +295,360 @@ $conn->close();
             margin-bottom: 2rem;
             color: #92400e;
         }
+        /* === Reviews Container === */
+        .reviews-container {
+            margin-top: 1.5rem;
+        }
+
+        .reviews-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .review-card {
+            background: linear-gradient(135deg, #3a3a40, #2c2c40);
+            border-left: 4px solid #667eea;
+            border-radius: 8px;
+            padding: 1.5rem;
+            color: #fff;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .reviewer-info {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .reviewer-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .reviewer-info h4 {
+            margin: 0;
+            color: #fff;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .reviewer-info small {
+            display: block;
+            color: #999;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        .review-rating {
+            display: flex;
+            gap: 5px;
+            color: #ffc107;
+        }
+
+        .review-rating i {
+            font-size: 1rem;
+        }
+
+        .review-title h3 {
+            margin: 0 0 0.5rem 0;
+            color: #fff;
+            font-size: 1.1rem;
+        }
+
+        .review-body {
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .review-body p {
+            margin: 0;
+        }
+
+        .review-footer {
+            color: #999;
+            font-size: 0.85rem;
+        }
+        /* === Buttons === */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ffcc00, #ffa500);
+            color: #1a1a2e;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 204, 0, 0.3);
+        }
+
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* === Action Buttons === */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        /* === Modal === */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: #2c2c40;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #fff;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+        }
+
+        .close-btn:hover {
+            color: #ffcc00;
+        }
+
+        /* === Form === */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input[type="text"],
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #1a1a2e;
+            border: 1px solid #444;
+            border-radius: 6px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #ffcc00;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* === Rating Input === */
+        .rating-input {
+            display: flex;
+            gap: 0.5rem;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+
+        .rating-input input[type="radio"] {
+            display: none;
+        }
+
+        .rating-input label {
+            font-size: 2rem;
+            color: #ddd;
+            cursor: pointer;
+            transition: 0.2s;
+            margin: 0;
+        }
+
+        .rating-input input[type="radio"]:checked ~ label,
+        .rating-input label:hover,
+        .rating-input label:hover ~ label {
+            color: #ffc107;
+        }
+
+        /* === Modal Actions === */
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        .modal-actions .btn {
+            margin: 0;
+        }
+
+        /* === Back Link === */
+        .back-link {
+            margin-top: 3rem;
+            text-align: center;
+        }
+
+        .back-link a {
+            color: #ffcc00;
+            text-decoration: none;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .back-link a:hover {
+            color: #ffa500;
+        }
+
+        /* === Responsive === */
+        @media (max-width: 768px) {
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-info h1 {
+                font-size: 1.5rem;
+            }
+
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .subscription-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-container {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            nav ul {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-buttons .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .review-header {
+                flex-direction: column;
+            }
+
+            .review-rating {
+                margin-top: 1rem;
+            }
+
+            .modal-content {
+                width: 95%;
+            }
+        }
     </style>
 </head>
 <body>
-
     <header>
         <div class="container nav-container">
             <h1 class="logo">LOGO OF OXYGYM</h1>
@@ -314,7 +663,6 @@ $conn->close();
             </div>
         </div>
     </header>
-
     <main class="profile-container">
         
         <!-- Profile Header -->
@@ -425,6 +773,59 @@ $conn->close();
             </div>
         </section>
 
+ <!-- Reviews Section -->
+        <section class="info-section">
+            <h2><i class="fas fa-star"></i> Your Reviews</h2>
+            
+            <div class="reviews-container">
+                <button class="btn btn-primary" id="addReviewBtn">
+                    <i class="fas fa-plus"></i> Write a Review
+                </button>
+
+                <div id="reviewsList" class="reviews-list">
+                    <p style="color: #999; text-align: center; padding: 2rem;">Loading reviews...</p>
+                </div>
+
+                <!-- Review Modal -->
+                <div id="reviewModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>Write a Review</h2>
+                            <button class="close-btn" type="button">&times;</button>
+                        </div>
+                        <form id="reviewForm" method="POST">
+                            <div class="form-group">
+                                <label>Rating</label>
+                                <div class="rating-input">
+                                    <input type="radio" name="rating" value="5" id="star5">
+                                    <label for="star5"><i class="fas fa-star"></i></label>
+                                    <input type="radio" name="rating" value="4" id="star4">
+                                    <label for="star4"><i class="fas fa-star"></i></label>
+                                    <input type="radio" name="rating" value="3" id="star3">
+                                    <label for="star3"><i class="fas fa-star"></i></label>
+                                    <input type="radio" name="rating" value="2" id="star2">
+                                    <label for="star2"><i class="fas fa-star"></i></label>
+                                    <input type="radio" name="rating" value="1" id="star1">
+                                    <label for="star1"><i class="fas fa-star"></i></label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="reviewTitle">Review Title</label>
+                                <input type="text" id="reviewTitle" name="title" placeholder="Sum up your experience..." required>
+                            </div>
+                            <div class="form-group">
+                                <label for="reviewBody">Your Review</label>
+                                <textarea id="reviewBody" name="body" placeholder="Share your experience..." required></textarea>
+                            </div>
+                            <div class="modal-actions">
+                                <button type="button" class="btn" id="cancelReviewBtn">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Post Review</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
         <!-- Action Buttons -->
         <div class="action-buttons">
             <a href="/Oxygym/pages/subs.php" class="btn btn-primary">
@@ -443,13 +844,6 @@ $conn->close();
         </div>
 
     </main>
-
-    <script src="assets/js/app.js"></script>
-    <script>
-        function handleLogout(event) {
-            event.preventDefault();
-            window.location.href = '/Oxygym/logout.php';
-        }
-    </script>
+    <script src="/Oxygym/assets\js\app.js"></script> 
 </body>
 </html>
