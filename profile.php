@@ -844,6 +844,6 @@ $conn->close();
         </div>
 
     </main>
-    <script src="/Oxygym/assets\js\app.js"></script> 
+    <script src="/Oxygym/assets\js\app.js"></script>
 </body>
 </html>
