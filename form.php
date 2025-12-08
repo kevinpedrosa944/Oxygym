@@ -8,12 +8,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $plan = sanitizeInput($_POST['plan'] ?? '');
     $name = sanitizeInput($_POST['name'] ?? '');
     $address = sanitizeInput($_POST['address'] ?? '');
+    $phone = sanitizeInput($_POST['phone'] ?? ''); // changed
     $birthday = sanitizeInput($_POST['birthday'] ?? '');
     $age = sanitizeInput($_POST['age'] ?? '');
     $gender = sanitizeInput($_POST['gender'] ?? '');
 
-    // Validate all fields
-    if (empty($plan) || empty($name) || empty($address) || empty($birthday) || empty($age) || empty($gender)) {
+    // Validate all fields (phone now required)
+    if (empty($plan) || empty($name) || empty($address) || empty($phone) || empty($birthday) || empty($age) || empty($gender)) {
         echo "<h2>❌ Registration Failed</h2>";
         echo "<p>Please fill all fields.</p>";
         echo '<a href="/Oxygym/pages/subs.php">← Go Back</a>';
@@ -71,13 +72,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $memberId = $row['Member_ID'];
     $stmt->close();
 
-    // Update member details in database
+    // Update member details in database: store phone in Members.Phone
     $updateStmt = $conn->prepare("
         UPDATE Members 
         SET 
             Birthdate = ?,
             Gender = ?,
-            Phone = ?
+            Phone = IF(? = '', Phone, ?)
         WHERE Member_ID = ?
     ");
 
@@ -87,7 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
-    $updateStmt->bind_param("sssi", $birthday, $gender, $address, $memberId);
+    $updateStmt->bind_param("ssssi", $birthday, $gender, $phone, $phone, $memberId);
     
     if (!$updateStmt->execute()) {
         echo "<h2>❌ Update Failed</h2>";
@@ -97,6 +98,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
     $updateStmt->close();
+
+    // Insert/update Address table for address
+    if ($address !== '') {
+        // Ensure Address table exists (create if missing)
+        $tblRes = $conn->query("SHOW TABLES LIKE 'Address'");
+        if (!($tblRes && $tblRes->num_rows > 0)) {
+            $createSql = "
+                CREATE TABLE IF NOT EXISTS `Address` (
+                    Member_ID INT NOT NULL PRIMARY KEY,
+                    Address TEXT,
+                    CONSTRAINT fk_address_member FOREIGN KEY (Member_ID) REFERENCES Members(Member_ID) ON DELETE CASCADE
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+            ";
+            @ $conn->query($createSql);
+            $tblRes = $conn->query("SHOW TABLES LIKE 'Address'");
+        }
+
+        if ($tblRes && $tblRes->num_rows > 0) {
+            $addrCheck = $conn->prepare("SELECT COUNT(*) as cnt FROM Address WHERE Member_ID = ?");
+            $addrCheck->bind_param("i", $memberId);
+            $addrCheck->execute();
+            $addrRes = $addrCheck->get_result();
+            if ($addrRow = $addrRes->fetch_assoc()) {
+                if ((int)$addrRow['cnt'] > 0) {
+                    $addrUpd = $conn->prepare("UPDATE Address SET Address = ? WHERE Member_ID = ?");
+                    $addrUpd->bind_param("si", $address, $memberId);
+                    $addrUpd->execute();
+                    $addrUpd->close();
+                } else {
+                    $addrIns = $conn->prepare("INSERT INTO Address (Member_ID, Address) VALUES (?, ?)");
+                    $addrIns->bind_param("is", $memberId, $address);
+                    $addrIns->execute();
+                    $addrIns->close();
+                }
+            }
+            $addrCheck->close();
+        } else {
+            // Address table could not be created; fallback: ensure Members.Phone updated earlier
+        }
+    }
 
     // Check if already has active subscription
     $checkSub = $conn->prepare("
@@ -297,6 +338,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="detail-row">
                     <span class="detail-label">Address:</span>
                     <span class="detail-value"><?= htmlspecialchars($address) ?></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Phone:</span>
+                    <span class="detail-value"><?= htmlspecialchars($phone) ?></span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Birthday:</span>

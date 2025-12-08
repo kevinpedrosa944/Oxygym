@@ -46,6 +46,25 @@ if ($result->num_rows === 0) {
 $member = $result->fetch_assoc();
 $memberQuery->close();
 
+// --- BEGIN: Fetch address (new) ---
+// Only use Address table if it exists and contains a row for this member.
+$address = null;
+$tblRes = $conn->query("SHOW TABLES LIKE 'Address'");
+if ($tblRes && $tblRes->num_rows > 0) {
+    $addrStmt = $conn->prepare("SELECT Address FROM Address WHERE Member_ID = ? LIMIT 1");
+    if ($addrStmt) {
+        $addrStmt->bind_param("i", $member['Member_ID']);
+        $addrStmt->execute();
+        $addrRes = $addrStmt->get_result();
+        if ($addrRow = $addrRes->fetch_assoc()) {
+            $address = $addrRow['Address'] ?? null;
+        }
+        $addrStmt->close();
+    }
+}
+// NOTE: Do NOT fallback to $member['Phone'] as ADDRESS. Phone is shown separately below.
+// --- END: Fetch address (new) ---
+
 // Check if user has active subscription
 if (!$member['Subscription_Status'] || $member['Subscription_Status'] !== 'Active') {
     $conn->close();
@@ -74,6 +93,13 @@ if ($member['Birthdate']) {
     $birthdateObj = new DateTime($member['Birthdate']);
     $age = $today->diff($birthdateObj)->y;
 }
+
+// --- BEGIN: Renewal token generation (new) ---
+$RENEW_SECRET = 'RENEW_SECRET_v1_change_me'; // must match subs.php
+$renewExpiry = time() + 600; // 10 minutes validity
+$renewToken = hash_hmac('sha256', $member['Member_ID'] . '|' . $renewExpiry, $RENEW_SECRET);
+$renewUrl = "/Oxygym/pages/subs.php?member=" . urlencode($member['Member_ID']) . "&exp=" . urlencode($renewExpiry) . "&token=" . urlencode($renewToken);
+// --- END: Renewal token generation (new) ---
 
 $conn->close();
 ?>
@@ -681,7 +707,7 @@ $conn->close();
         <?php if ($daysRemaining <= 7 && $daysRemaining > 0): ?>
             <div class="warning-banner">
                 <i class="fas fa-exclamation-triangle"></i>
-                Your subscription expires in <?= $daysRemaining ?> days. <a href="/Oxygym/pages/subs.php" style="color: #92400e; font-weight: bold;">Renew now</a>
+                Your subscription expires in <?= $daysRemaining ?> days. <a href="<?= htmlspecialchars($renewUrl) ?>" style="color: #92400e; font-weight: bold;">Renew now</a>
             </div>
         <?php endif; ?>
 
@@ -701,14 +727,30 @@ $conn->close();
                     <span class="detail-label">Email</span>
                     <span class="detail-value"><?= htmlspecialchars($member['Email'] ?? 'N/A') ?></span>
                 </div>
+
+                <!-- Renamed label: show stored Phone column as ADDRESS -->
                 <div class="detail-item">
-                    <span class="detail-label">Phone</span>
-                    <span class="detail-value"><?= htmlspecialchars($member['Phone'] ?? 'Not provided') ?></span>
+                    <span class="detail-label">ADDRESS</span>
+                    <span class="detail-value"><?= htmlspecialchars($address ?? 'Not provided') ?></span>
                 </div>
+
                 <div class="detail-item">
                     <span class="detail-label">Gender</span>
                     <span class="detail-value"><?= htmlspecialchars($member['Gender'] ?? 'Not specified') ?></span>
                 </div>
+
+                <!-- Phone Number now from Members.Phone -->
+                <div class="detail-item">
+                    <span class="detail-label">Phone Number</span>
+                    <span class="detail-value">
+                        <?php if (!empty($member['Phone'])): ?>
+                            <?= htmlspecialchars($member['Phone']) ?>
+                        <?php else: ?>
+                            <span style="color:#ef4444; font-weight:700;">Required — <a href="/Oxygym/pages/subs.php" style="color:#ef4444; font-weight:700; text-decoration:underline;">Add phone number</a></span>
+                        <?php endif; ?>
+                    </span>
+                </div>
+
                 <div class="detail-item">
                     <span class="detail-label">Date of Birth</span>
                     <span class="detail-value"><?= $age > 0 ? $birthdate . ' (' . $age . ' years old)' : 'Not provided' ?></span>
@@ -832,7 +874,7 @@ $conn->close();
             <a href="/Oxygym/pages/subs.php" class="btn btn-primary">
                 <i class="fas fa-sync-alt"></i> Change Plan
             </a>
-            <a href="/Oxygym/pages/subs.php" class="btn btn-primary">
+            <a href="<?= htmlspecialchars($renewUrl) ?>" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Renew Subscription
             </a>
             <a href="#" class="btn btn-danger" onclick="handleLogout(event)">
