@@ -221,7 +221,7 @@
                     fetch('/Oxygym/api/check_session.php', { credentials: 'same-origin' })
                         .then(function (res) { return res.json(); })
                         .then(function (data) {
-                            var loggedIn = !!(data && (data.loggedIn || data.logged_in || data.authenticated));
+                            var loggedIn = !!(data && data.authenticated);
                             if (loggedIn) {
                                 window.location.href = '/Oxygym/pages/subs.php';
                             } else {
@@ -240,7 +240,7 @@
                 fetch('/Oxygym/api/check_session.php', { credentials: 'same-origin' })
                     .then(function (res) { return res.json(); })
                     .then(function (data) {
-                        var loggedIn = !!(data && (data.loggedIn || data.logged_in || data.authenticated));
+                        var loggedIn = !!(data && data.authenticated);
                         if (loggedIn) {
                             window.location.href = '/Oxygym/pages/subs.php?plan=' + encodeURIComponent(plan);
                         } else {

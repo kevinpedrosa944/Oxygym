@@ -1,58 +1,40 @@
 <?php
 // filepath: c:\xampp\htdocs\Oxygym\api\admin\update-role.php
 
+session_start();
 header('Content-Type: application/json');
+include('../../includes/db_connect.php');
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+if (empty($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+    exit();
 }
 
-include('../../includes/db_connect.php');
-include('../../includes/auth.php');
+$input = file_get_contents('php://input');
+$data = json_decode($input, true);
 
-checkAuth();
+$user_id = isset($data['user_id']) ? (int)$data['user_id'] : 0;
+$role = isset($data['role']) ? trim($data['role']) : '';
 
-if ($_SESSION['role'] !== 'Admin') {
-    http_response_code(403);
-    echo json_encode(['error' => 'Access denied']);
+$allowed = ['Member', 'Staff', 'Admin'];
+if ($user_id <= 0 || !in_array($role, $allowed, true)) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'error' => 'Invalid parameters']);
     exit();
 }
 
 try {
-    $data = json_decode(file_get_contents('php://input'), true);
-
-    if (!isset($data['user_id']) || !isset($data['role'])) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Missing required fields']);
-        exit();
-    }
-
-    $userId = (int)$data['user_id'];
-    $role = trim($data['role']);
-
-    // Validate role
-    $validRoles = ['Member', 'Staff', 'Admin'];
-    if (!in_array($role, $validRoles)) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Invalid role']);
-        exit();
-    }
-
-    // Update role
     $stmt = $conn->prepare("UPDATE users SET Role = ? WHERE User_ID = ?");
-    $stmt->bind_param("si", $role, $userId);
+    $stmt->bind_param("si", $role, $user_id);
     $stmt->execute();
+    $affected = $stmt->affected_rows;
     $stmt->close();
 
-    echo json_encode([
-        'success' => true,
-        'message' => 'Role updated successfully'
-    ]);
-
+    echo json_encode(['success' => true, 'affected' => $affected]);
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()]);
+    echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }
-
 $conn->close();
 ?>

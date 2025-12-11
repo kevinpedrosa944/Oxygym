@@ -1,48 +1,38 @@
 <?php
-// filepath: c:\xampp\htdocs\Oxygym\api\admin\dashboard.php
-
+session_start();
 header('Content-Type: application/json');
-
 include('../../includes/db_connect.php');
-include('../../includes/auth.php');
 
-checkAuth();
-
-// Only admins can access
-if ($_SESSION['role'] !== 'Admin') {
-    http_response_code(403);
-    echo json_encode(['error' => 'Access denied']);
+if (empty($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
+    http_response_code(401);
+    echo json_encode(['error' => 'Unauthorized']);
     exit();
 }
 
 try {
-    // Total users
-    $usersResult = $conn->query("SELECT COUNT(*) as count FROM users");
-    $totalUsers = $usersResult->fetch_assoc()['count'];
+    $totals = [
+        'totalUsers' => 0,
+        'totalMembers' => 0,
+        'activeSubscriptions' => 0,
+        'totalReviews' => 0
+    ];
 
-    // Total members
-    $membersResult = $conn->query("SELECT COUNT(*) as count FROM members");
-    $totalMembers = $membersResult->fetch_assoc()['count'];
+    $q = $conn->prepare("SELECT COUNT(*) AS c FROM users");
+    $q->execute(); $r = $q->get_result(); $row = $r->fetch_assoc(); $totals['totalUsers'] = (int)$row['c']; $q->close();
 
-    // Active subscriptions
-    $subsResult = $conn->query("SELECT COUNT(*) as count FROM subscription_history WHERE Status = 'Active'");
-    $activeSubscriptions = $subsResult->fetch_assoc()['count'];
+    $q = $conn->prepare("SELECT COUNT(*) AS c FROM members");
+    $q->execute(); $r = $q->get_result(); $row = $r->fetch_assoc(); $totals['totalMembers'] = (int)$row['c']; $q->close();
 
-    // Total reviews
-    $reviewsResult = $conn->query("SELECT COUNT(*) as count FROM reviews");
-    $totalReviews = $reviewsResult->fetch_assoc()['count'];
+    $q = $conn->prepare("SELECT COUNT(*) AS c FROM Subscription_History WHERE Status = 'Active'");
+    $q->execute(); $r = $q->get_result(); $row = $r->fetch_assoc(); $totals['activeSubscriptions'] = (int)$row['c']; $q->close();
 
-    echo json_encode([
-        'totalUsers' => $totalUsers,
-        'totalMembers' => $totalMembers,
-        'activeSubscriptions' => $activeSubscriptions,
-        'totalReviews' => $totalReviews
-    ]);
+    $q = $conn->prepare("SELECT COUNT(*) AS c FROM reviews");
+    $q->execute(); $r = $q->get_result(); $row = $r->fetch_assoc(); $totals['totalReviews'] = (int)$row['c']; $q->close();
 
+    echo json_encode($totals);
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['error' => $e->getMessage()]);
 }
-
 $conn->close();
 ?>

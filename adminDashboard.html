@@ -648,22 +648,30 @@
         }
 
         async function loadReviews() {
+            const tbody = document.getElementById('reviewsTable');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">Loading...</td></tr>';
             try {
-                const response = await fetch('/Oxygym/api/admin/reviews.php');
-                const data = await response.json();
+                const response = await fetch('/Oxygym/api/admin/reviews.php', { credentials: 'same-origin' });
+                if (!response.ok) {
+                    // API returned an error (401/403/500 etc.)
+                    console.error('Failed to fetch reviews, status:', response.status);
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">Unable to load reviews (server error).</td></tr>';
+                    return;
+                }
 
-                const tbody = document.getElementById('reviewsTable');
+                const data = await response.json();
                 tbody.innerHTML = '';
 
-                if (data.reviews && data.reviews.length > 0) {
+                if (data && Array.isArray(data.reviews) && data.reviews.length > 0) {
                     data.reviews.forEach(review => {
+                        const stars = (review.Rating && Number(review.Rating) > 0) ? '⭐'.repeat(Number(review.Rating)) : '';
                         tbody.innerHTML += `
                             <tr>
                                 <td>${review.Review_ID}</td>
-                                <td>${review.First_Name} ${review.Last_Name}</td>
-                                <td>${'⭐'.repeat(review.Rating)}</td>
-                                <td>${review.Title}</td>
-                                <td>${review.Created_At}</td>
+                                <td>${(review.member_name || 'Unknown')}</td>
+                                <td>${stars}</td>
+                                <td>${(review.Title || '')}</td>
+                                <td>${(review.Created_At || '')}</td>
                             </tr>
                         `;
                     });
@@ -672,6 +680,7 @@
                 }
             } catch (error) {
                 console.error('Reviews load error:', error);
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">Unable to load reviews (network error).</td></tr>';
             }
         }
 

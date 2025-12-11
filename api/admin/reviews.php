@@ -1,6 +1,4 @@
 <?php
-// filepath: c:\xampp\htdocs\Oxygym\api\admin\reviews.php
-
 header('Content-Type: application/json');
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -8,37 +6,38 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 include('../../includes/db_connect.php');
-include('../../includes/auth.php');
 
-checkAuth();
-
-if ($_SESSION['role'] !== 'Admin') {
+// simple session/role check (avoid includes/auth.php redirection/output)
+if (empty($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
     http_response_code(403);
     echo json_encode(['error' => 'Access denied']);
     exit();
 }
 
 try {
-    $result = $conn->query("
+    $stmt = $conn->prepare("
         SELECT 
             r.Review_ID,
-            m.First_Name,
-            m.Last_Name,
+            r.Member_ID,
             r.Rating,
             r.Title,
-            r.Created_At
+            r.Body,
+            r.Created_At,
+            m.First_Name,
+            m.Last_Name,
+            u.Username,
+            COALESCE(NULLIF(CONCAT_WS(' ', m.First_Name, m.Last_Name), ''), u.Username, 'Unknown') AS member_name
         FROM reviews r
-        JOIN members m ON r.Member_ID = m.Member_ID
+        LEFT JOIN Members m ON r.Member_ID = m.Member_ID
+        LEFT JOIN Users u ON r.Member_ID = u.Member_ID
         ORDER BY r.Created_At DESC
     ");
-
-    $reviews = [];
-    while ($row = $result->fetch_assoc()) {
-        $reviews[] = $row;
-    }
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $reviews = $res->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
 
     echo json_encode(['reviews' => $reviews]);
-
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['error' => $e->getMessage()]);
