@@ -1,6 +1,4 @@
 <?php
-// filepath: c:\xampp\htdocs\Oxygym\api\Login.php
-
 header('Content-Type: application/json');
 
 if (session_status() === PHP_SESSION_NONE) {
