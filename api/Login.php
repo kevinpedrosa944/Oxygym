@@ -131,32 +131,11 @@ try {
         $redirect = '/Oxygym/api/staff/dashboard.php';
         error_log("Staff detected - redirecting to: $redirect");
     } elseif ($user['Role'] === 'Member') {
-        error_log("Member detected - checking subscription...");
-        
-        if ($user['Member_ID']) {
-            $subStmt = $conn->prepare("
-                SELECT Subscription_ID FROM subscription_history 
-                WHERE Member_ID = ? AND Status = 'Active'
-                LIMIT 1
-            ");
-            $subStmt->bind_param("i", $user['Member_ID']);
-            $subStmt->execute();
-            $subResult = $subStmt->get_result();
-            
-            if ($subResult->num_rows > 0) {
-                $redirect = '/Oxygym/profile.php';
-                error_log("Active subscription found - redirecting to: $redirect");
-            } else {
-                $redirect = '/Oxygym/pages/subs.php';
-                error_log("No active subscription - redirecting to: $redirect");
-            }
-            $subStmt->close();
-        } else {
-            $redirect = '/Oxygym/pages/subs.php';
-            error_log("No member ID - redirecting to: $redirect");
-        }
+        // Always redirect members to the homepage (index.html) after successful login
+        $redirect = '/Oxygym/index.html';
+        error_log("Member detected - redirecting to: $redirect");
     }
-
+    
     error_log("Final redirect URL: $redirect");
     error_log("=== LOGIN SUCCESS ===");
 

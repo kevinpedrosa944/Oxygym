@@ -36,8 +36,9 @@
             <h2>Start a Better Shape of You!</h2>
             <p>Transform your body, transform your life</p>
             <div class="cta-btns">
-                <button class="learn-more-btn">Learn More</button>
-                <button class="join-us-btn" onclick="heroCTAClick()">Join Us Today</button>
+                <!-- buttons kept visually identical, IDs added for behavior -->
+                <button id="learnBtn" class="learn-more-btn" type="button">Learn More</button>
+                <button id="joinBtn" class="join-us-btn" type="button">Join Us Today</button>
             </div>
         </div>
     </section>
@@ -201,13 +202,56 @@
     <script src="assets/js/auth.js"></script>
 
     <script>
-        function heroCTAClick() {
-            window.location.href = 'Login.html';
-        }
+        // Smooth scroll for "Learn More" and session-checked redirect for "Join Us Today".
+        document.addEventListener('DOMContentLoaded', function () {
+            // Learn More: smooth scroll to about section
+            var learnBtn = document.getElementById('learnBtn');
+            if (learnBtn) {
+                learnBtn.addEventListener('click', function () {
+                    var target = document.getElementById('about-section');
+                    if (target) target.scrollIntoView({behavior: 'smooth', block: 'start'});
+                });
+            }
 
-        function subscribePlan(plan) {
-            window.location.href = '/Oxygym/pages/subs.php';
-        }
+            // Join button: call server endpoint to check session and redirect accordingly
+            var joinBtn = document.getElementById('joinBtn');
+            if (joinBtn) {
+                joinBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    fetch('/Oxygym/api/check_session.php', { credentials: 'same-origin' })
+                        .then(function (res) { return res.json(); })
+                        .then(function (data) {
+                            var loggedIn = !!(data && (data.loggedIn || data.logged_in || data.authenticated));
+                            if (loggedIn) {
+                                window.location.href = '/Oxygym/pages/subs.php';
+                            } else {
+                                window.location.href = '/Oxygym/Login.html';
+                            }
+                        })
+                        .catch(function () {
+                            // fallback to login on error
+                            window.location.href = '/Oxygym/Login.html';
+                        });
+                });
+            }
+
+            // Plan subscribe buttons: reuse the same session check and forward plan as query param
+            window.subscribePlan = function(plan) {
+                fetch('/Oxygym/api/check_session.php', { credentials: 'same-origin' })
+                    .then(function (res) { return res.json(); })
+                    .then(function (data) {
+                        var loggedIn = !!(data && (data.loggedIn || data.logged_in || data.authenticated));
+                        if (loggedIn) {
+                            window.location.href = '/Oxygym/pages/subs.php?plan=' + encodeURIComponent(plan);
+                        } else {
+                            window.location.href = '/Oxygym/Login.html';
+                        }
+                    })
+                    .catch(function () {
+                        window.location.href = '/Oxygym/Login.html';
+                    });
+            };
+        });
     </script>
 </body>
 </html>
