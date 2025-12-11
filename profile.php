@@ -3,7 +3,7 @@ session_start();
 include('includes/db_connect.php');
 include('includes/auth.php');
 
-// Get full member details from database
+// Get member details (without inline subscription join)
 $memberQuery = $conn->prepare("
     SELECT 
         m.Member_ID,
@@ -11,19 +11,12 @@ $memberQuery = $conn->prepare("
         m.Last_Name,
         m.Email,
         m.Phone,
+        m.Address,
         m.Gender,
         m.Birthdate,
-        m.Join_Date,
-        mt.Name as Membership_Name,
-        mt.Price,
-        mt.Duration_Days,
-        sh.Start_Date,
-        sh.End_Date,
-        sh.Status as Subscription_Status
+        m.Join_Date
     FROM Users u
     LEFT JOIN Members m ON u.Member_ID = m.Member_ID
-    LEFT JOIN Subscription_History sh ON m.Member_ID = sh.Member_ID AND sh.Status = 'Active'AND sh.Start_Date <= CURDATE() AND sh.End_Date >= CURDATE()
-    LEFT JOIN Membership_Types mt ON sh.Membership_ID = mt.Membership_ID
     WHERE u.Username = ?
     LIMIT 1
 ");
@@ -46,11 +39,39 @@ if ($result->num_rows === 0) {
 $member = $result->fetch_assoc();
 $memberQuery->close();
 
-// Check if user has active subscription
-if (!$member['Subscription_Status'] || $member['Subscription_Status'] !== 'Active') {
-    $conn->close();
-    header("Location: /Oxygym/pages/subs.php");
-    exit();
+// Fetch latest active subscription for this member (most recent Start_Date)
+$subStmt = $conn->prepare("
+    SELECT sh.Start_Date, sh.End_Date, sh.Status as Subscription_Status,
+           mt.Name as Membership_Name, mt.Price, mt.Duration_Days
+    FROM Subscription_History sh
+    LEFT JOIN Membership_Types mt ON sh.Membership_ID = mt.Membership_ID
+    WHERE sh.Member_ID = ? AND sh.Status = 'Active'
+    ORDER BY sh.Start_Date DESC
+    LIMIT 1
+");
+if ($subStmt) {
+    $subStmt->bind_param("i", $member['Member_ID']);
+    $subStmt->execute();
+    $subRes = $subStmt->get_result();
+    if ($subRes && $subRes->num_rows > 0) {
+        $sub = $subRes->fetch_assoc();
+        // merge subscription fields into $member for existing profile usage
+        $member['Start_Date'] = $sub['Start_Date'];
+        $member['End_Date'] = $sub['End_Date'];
+        $member['Subscription_Status'] = $sub['Subscription_Status'];
+        $member['Membership_Name'] = $sub['Membership_Name'];
+        $member['Price'] = $sub['Price'];
+        $member['Duration_Days'] = $sub['Duration_Days'];
+    } else {
+        // no active subscription found
+        $subStmt->close();
+        $conn->close();
+        header("Location: /Oxygym/pages/subs.php");
+        exit();
+    }
+    $subStmt->close();
+} else {
+    die('Database error: ' . $conn->error);
 }
 
 // Calculate days remaining - with null check
@@ -705,6 +726,12 @@ $conn->close();
                     <span class="detail-label">Phone</span>
                     <span class="detail-value"><?= htmlspecialchars($member['Phone'] ?? 'Not provided') ?></span>
                 </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Address</span>
+                    <span class="detail-value"><?= htmlspecialchars($member['Address'] ?? 'Not provided') ?></span>
+                </div>
+
                 <div class="detail-item">
                     <span class="detail-label">Gender</span>
                     <span class="detail-value"><?= htmlspecialchars($member['Gender'] ?? 'Not specified') ?></span>
