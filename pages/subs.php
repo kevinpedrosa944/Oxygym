@@ -4,14 +4,45 @@ include('../includes/db_connect.php');
 include('../includes/validate.php');
 include('../includes/auth.php');
 
+// Fetch existing member details to prefill the form
+$firstName = $lastName = $phone = $address = $birthday = $gender = '';
+$memberId = null;
+
+$fetchStmt = $conn->prepare("
+    SELECT m.Member_ID, m.First_Name, m.Last_Name, m.Phone, m.Address, m.Birthdate, m.Gender
+    FROM Users u
+    LEFT JOIN Members m ON u.Member_ID = m.Member_ID
+    WHERE u.Username = ?
+    LIMIT 1
+");
+if ($fetchStmt) {
+    $fetchStmt->bind_param("s", $_SESSION['username']);
+    $fetchStmt->execute();
+    $fetchResult = $fetchStmt->get_result();
+    if ($fetchResult && $fetchResult->num_rows > 0) {
+        $mrow = $fetchResult->fetch_assoc();
+        $memberId = $mrow['Member_ID'];
+        $firstName = $mrow['First_Name'] ?? '';
+        $lastName = $mrow['Last_Name'] ?? '';
+        $phone = $mrow['Phone'] ?? '';
+        $address = $mrow['Address'] ?? '';
+        $birthday = $mrow['Birthdate'] ?? '';
+        $gender = $mrow['Gender'] ?? '';
+    }
+    $fetchStmt->close();
+}
+
 // Handle subscription form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
+    // sanitize inputs
     $plan = sanitizeInput($_POST['plan']);
-    $name = sanitizeInput($_POST['name'] ?? '');
+    $firstName = sanitizeInput($_POST['first_name'] ?? '');
+    $lastName = sanitizeInput($_POST['last_name'] ?? '');
     $address = sanitizeInput($_POST['address'] ?? '');
     $birthday = sanitizeInput($_POST['birthday'] ?? '');
     $age = sanitizeInput($_POST['age'] ?? '');
     $gender = sanitizeInput($_POST['gender'] ?? '');
+    $phone = sanitizeInput($_POST['phone'] ?? '');
     
     // Map plan name to Membership_ID
     $planMap = ['Standard' => 1, 'Prime' => 2, 'Premium' => 3];
@@ -31,11 +62,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
         $row = $result->fetch_assoc();
         $memberId = $row['Member_ID'];
         
-        // Update member details
-        $updateMember = $conn->prepare("UPDATE Members SET Email = COALESCE(Email, ?), Birthdate = ?, Gender = ? WHERE Member_ID = ?");
-        $updateMember->bind_param("sssi", $_SESSION['email'], $birthday, $gender, $memberId);
-        $updateMember->execute();
-        $updateMember->close();
+        // Update member details (store first/last name, phone, address, birthdate, gender)
+        $updateMember = $conn->prepare("UPDATE Members SET First_Name = ?, Last_Name = ?, Phone = ?, Address = ?, Birthdate = ?, Gender = ? WHERE Member_ID = ?");
+        if ($updateMember) {
+            $updateMember->bind_param("ssssssi", $firstName, $lastName, $phone, $address, $birthday, $gender, $memberId);
+            $updateMember->execute();
+            $updateMember->close();
+        }
+        
+        // --- NEW: mark any existing active subscriptions as Expired before inserting a new one ---
+        $expireStmt = $conn->prepare("UPDATE Subscription_History SET Status = 'Expired' WHERE Member_ID = ? AND Status = 'Active'");
+        if ($expireStmt) {
+            $expireStmt->bind_param("i", $memberId);
+            $expireStmt->execute();
+            $expireStmt->close();
+        }
+        // --- end NEW ---
         
         // Insert subscription record
         $startDate = date('Y-m-d');
@@ -223,32 +265,42 @@ $conn->close();
 
                 <!-- Personal Details -->
                 <div class="form-group">
-                    <label for="name">Full Name *</label>
-                    <input type="text" id="name" name="name" placeholder="John Doe" required>
+                    <label for="first_name">First Name *</label>
+                    <input type="text" id="first_name" name="first_name" placeholder="John" required value="<?= htmlspecialchars($firstName) ?>">
+                </div>
+
+                <div class="form-group">
+                    <label for="last_name">Last Name *</label>
+                    <input type="text" id="last_name" name="last_name" placeholder="Doe" required value="<?= htmlspecialchars($lastName) ?>">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" name="phone" placeholder="+63 9xx xxx xxxx" required value="<?= htmlspecialchars($phone) ?>">
                 </div>
 
                 <div class="form-group">
                     <label for="address">Address *</label>
-                    <input type="text" id="address" name="address" placeholder="123 Street, City" required>
+                    <input type="text" id="address" name="address" placeholder="123 Street, City" required value="<?= htmlspecialchars($address) ?>">
                 </div>
 
                 <div class="form-group">
                     <label for="birthday">Birthday *</label>
-                    <input type="date" id="birthday" name="birthday" required>
+                    <input type="date" id="birthday" name="birthday" required value="<?= htmlspecialchars($birthday) ?>">
                 </div>
 
                 <div class="form-group">
                     <label for="age">Age *</label>
-                    <input type="number" id="age" name="age" placeholder="25" min="18" required>
+                    <input type="number" id="age" name="age" placeholder="25" min="18" required value="" readonly>
                 </div>
 
                 <div class="form-group">
                     <label for="gender">Gender *</label>
                     <select id="gender" name="gender" required>
                         <option value="">Select Gender</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
+                        <option value="Male" <?= $gender === 'Male' ? 'selected' : '' ?>>Male</option>
+                        <option value="Female" <?= $gender === 'Female' ? 'selected' : '' ?>>Female</option>
+                        <option value="Other" <?= $gender === 'Other' ? 'selected' : '' ?>>Other</option>
                     </select>
                 </div>
 
@@ -267,6 +319,43 @@ $conn->close();
             event.preventDefault();
             window.location.href = '/Oxygym/logout.php';
         }
+
+        // Auto-calculate age from birthdate and populate the age input
+        (function() {
+            const birthdayEl = document.getElementById('birthday');
+            const ageEl = document.getElementById('age');
+
+            function calculateAge(birthdate) {
+                if (!birthdate) return '';
+                const today = new Date();
+                const b = new Date(birthdate);
+                let age = today.getFullYear() - b.getFullYear();
+                const m = today.getMonth() - b.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < b.getDate())) {
+                    age--;
+                }
+                return age >= 0 ? age : '';
+            }
+
+            function updateAge() {
+                const val = birthdayEl.value;
+                const age = calculateAge(val);
+                if (age !== '') {
+                    ageEl.value = age;
+                } else {
+                    ageEl.value = '';
+                }
+            }
+
+            birthdayEl.addEventListener('change', updateAge);
+
+            // Initialize on load if there's a prefilled birthday
+            document.addEventListener('DOMContentLoaded', function() {
+                if (birthdayEl.value) {
+                    updateAge();
+                }
+            });
+        })();
     </script>
 </body>
 </html>
