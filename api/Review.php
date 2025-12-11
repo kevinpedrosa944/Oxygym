@@ -57,15 +57,16 @@ try {
         $input = file_get_contents('php://input');
         $data = json_decode($input, true);
 
-        if (!isset($data['rating']) || !isset($data['title']) || !isset($data['body'])) {
+        // accept either 'body' or 'comment' from caller, prefer 'body'
+        $bodyText = trim($data['body'] ?? $data['comment'] ?? '');
+        $rating = isset($data['rating']) ? intval($data['rating']) : null;
+        $title = isset($data['title']) ? trim($data['title']) : '';
+
+        if ($rating === null || !isset($data['title']) || $bodyText === '') {
             http_response_code(400);
             echo json_encode(['error' => 'Missing required fields']);
             exit();
         }
-
-        $rating = intval($data['rating']);
-        $title = trim($data['title']);
-        $body = trim($data['body']);
 
         if ($rating < 1 || $rating > 5) {
             http_response_code(400);
@@ -73,13 +74,13 @@ try {
             exit();
         }
 
-        if (empty($title) || empty($body)) {
+        if (empty($title) || empty($bodyText)) {
             http_response_code(400);
             echo json_encode(['error' => 'Title and body are required']);
             exit();
         }
 
-        // Check if review exists
+        // Check if review exists for this member
         $checkStmt = $conn->prepare("SELECT Review_ID FROM reviews WHERE Member_ID = ?");
         $checkStmt->bind_param("i", $memberId);
         $checkStmt->execute();
@@ -98,7 +99,7 @@ try {
                 throw new Exception($conn->error);
             }
 
-            $updateStmt->bind_param("issi", $rating, $title, $body, $memberId);
+            $updateStmt->bind_param("issi", $rating, $title, $bodyText, $memberId);
             $updateStmt->execute();
             $updateStmt->close();
 
@@ -115,7 +116,7 @@ try {
                 throw new Exception($conn->error);
             }
 
-            $insertStmt->bind_param("iiss", $memberId, $rating, $title, $body);
+            $insertStmt->bind_param("iiss", $memberId, $rating, $title, $bodyText);
             $insertStmt->execute();
             $insertStmt->close();
 
