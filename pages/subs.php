@@ -113,103 +113,170 @@ $conn->close();
     <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        .subs-container {
-            max-width: 800px;
-            margin: 8rem auto 3rem;
-            padding: 2rem;
+        body {
+            background: #f3f4f6;
         }
+
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .subs-container {
+            max-width: 900px;
+            margin: 7rem auto 3rem;
+            padding: 1.5rem;
+        }
+
         .form-section {
             background: white;
-            padding: 2rem;
+            padding: 2.5rem;
             border-radius: 1rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        }
+
+        .form-section h2 {
+            font-size: 1.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-section p {
             margin-bottom: 2rem;
         }
-        .form-section h2 {
-            color: #333;
-            margin-bottom: 1.5rem;
-            font-size: 1.8rem;
+
+        /* Grid layout for inputs */
+        form {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.25rem;
         }
-        .form-group {
-            margin-bottom: 1.5rem;
+
+        /* Full-width sections */
+        .form-group,
+        .plan-options,
+        button {
+            grid-column: span 2;
         }
+
         .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
             font-weight: 600;
-            color: #333;
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+            display: block;
         }
+
         .form-group input,
         .form-group select {
             width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #d1d5db;
+            padding: 0.75rem 0.8rem;
             border-radius: 0.5rem;
-            font-size: 1rem;
+            border: 1px solid #d1d5db;
+            font-size: 0.95rem;
         }
+
+        .form-group input[readonly] {
+            background: #f9fafb;
+            color: #6b7280;
+            cursor: not-allowed;
+        }
+
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
         }
+
+        /* Plans */
         .plan-options {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 1rem;
-            margin-bottom: 1.5rem;
         }
+
         .plan-option {
             border: 2px solid #e5e7eb;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            cursor: pointer;
-            transition: all 0.3s;
+            border-radius: 0.75rem;
+            padding: 1.2rem;
             text-align: center;
+            cursor: pointer;
+            transition: 0.25s ease;
         }
-        .plan-option input[type="radio"] {
+
+        .plan-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+        }
+
+        .plan-option input {
             display: none;
         }
-        .plan-option input[type="radio"]:checked + .plan-label {
-            border-color: #3b82f6;
-            background-color: #eff6ff;
-        }
-        .plan-label {
-            cursor: pointer;
-        }
-        .plan-label h3 {
-            color: #333;
-            margin-bottom: 0.5rem;
-        }
-        .plan-label p {
-            color: #667eea;
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
-        .btn-submit {
-            background-color: #3b82f6;
-            color: white;
-            padding: 0.75rem 2rem;
-            border: none;
+
+        .plan-option input:checked + .plan-label {
+            background: #eff6ff;
             border-radius: 0.5rem;
+        }
+
+        .plan-option:has(input:checked) {
+            border-color: #2563eb;
+        }
+
+        .plan-label h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .plan-label p {
+            font-weight: 700;
+            color: #2563eb;
+            font-size: 1.15rem;
+        }
+
+        .btn-submit {
+            margin-top: 1rem;
+            padding: 0.85rem;
             font-size: 1rem;
-            cursor: pointer;
-            width: 100%;
             font-weight: 600;
+            border-radius: 0.6rem;
+            background: #2563eb;
+            transition: background 0.2s ease;
         }
+
         .btn-submit:hover {
-            background-color: #2563eb;
+            background: #1e40af;
         }
+
         .back-link {
             text-align: center;
             margin-top: 2rem;
         }
+
         .back-link a {
-            color: #3b82f6;
-            text-decoration: none;
             font-weight: 500;
         }
-    </style>
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            form {
+                grid-template-columns: 1fr;
+            }
+
+            .plan-options {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group,
+            .plan-options,
+            button {
+                grid-column: span 1;
+            }
+        }
+</style>
+
 </head>
 <body>
     <header>
