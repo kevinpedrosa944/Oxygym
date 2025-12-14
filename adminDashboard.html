@@ -39,6 +39,11 @@
                     <div class="stat-card"><div class="number" id="totalMembers">0</div><div class="label">Total Members</div></div>
                     <div class="stat-card"><div class="number" id="activeSubscriptions">0</div><div class="label">Active Subscriptions</div></div>
                     <div class="stat-card"><div class="number" id="totalReviews">0</div><div class="label">Total Reviews</div></div>
+                    <div class="stat-card"><div class="number" id="totalRevenue">₱0</div><div class="label">Total Revenue</div></div>
+                    <div class="stat-card"><div class="number" id="resubscriptions">0</div><div class="label">Resubscriptions</div></div>
+                    <div class="stat-card"><div class="number" id="newUsers">0</div><div class="label">New Users</div></div>
+                    <div class="stat-card"><div class="number" id="newSubscribers">0</div><div class="label">New Subscribers</div></div>
+                    <div class="stat-card"><div class="number" id="availableCoaches">0</div><div class="label">Available Coaches</div></div>
                 </div>
             </div>
 
@@ -172,6 +177,11 @@
                 document.getElementById('totalMembers').textContent = data.totalMembers || '0';
                 document.getElementById('activeSubscriptions').textContent = data.activeSubscriptions || '0';
                 document.getElementById('totalReviews').textContent = data.totalReviews || '0';
+                document.getElementById('totalRevenue').textContent = data.totalRevenue ? `₱${parseFloat(data.totalRevenue).toFixed(2)}` : '₱0';
+                document.getElementById('resubscriptions').textContent = data.resubscriptions || 0;
+                document.getElementById('newUsers').textContent = data.newUsers || 0;
+                document.getElementById('newSubscribers').textContent = data.newSubscribers || 0;
+                document.getElementById('availableCoaches').textContent = data.availableCoaches || 0;
             } catch (error) { console.error('Dashboard load error:', error); }
         }
 
