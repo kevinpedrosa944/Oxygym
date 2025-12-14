@@ -15,38 +15,13 @@ if (empty($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
 }
 
 try {
-    // fetch users with Role = 'Member' and join member profile when available
-    $stmt = $conn->prepare("
-        SELECT 
-            u.User_ID,
-            u.Username,
-            u.Role,
-            u.Member_ID,
-            m.First_Name,
-            m.Last_Name,
-            COALESCE(m.Email, u.Username) AS Email,
-            m.Phone,
-            m.Join_Date
-        FROM Users u
-        LEFT JOIN Members m ON u.Member_ID = m.Member_ID
-        WHERE u.Role = 'Member'
-        ORDER BY u.User_ID DESC
-    ");
+    // Corrected query to fetch the actual status from the Members table
+    $stmt = $conn->prepare("\n        SELECT \n            u.User_ID,\n            u.Username,\n            u.Role,\n            u.Member_ID,\n            m.First_Name,\n            m.Last_Name,\n            COALESCE(m.Email, u.Username) AS Email,\n            m.Phone,\n            m.Join_Date,\n            m.STATUS\n        FROM Users u\n        LEFT JOIN Members m ON u.Member_ID = m.Member_ID\n        WHERE u.Role = 'Member'\n        ORDER BY u.User_ID DESC\n    ");
     $stmt->execute();
     $res = $stmt->get_result();
     $members = [];
     while ($row = $res->fetch_assoc()) {
-        $members[] = [
-            'User_ID'   => (int)$row['User_ID'],
-            'Member_ID' => $row['Member_ID'] !== null ? (int)$row['Member_ID'] : null,
-            'Username'  => $row['Username'],
-            'First_Name'=> $row['First_Name'] ?? '',
-            'Last_Name' => $row['Last_Name'] ?? '',
-            'Email'     => $row['Email'] ?? '',
-            'Phone'     => $row['Phone'] ?? null,
-            'Join_Date' => $row['Join_Date'] ?? null,
-            'Status'    => 'Active'
-        ];
+        $members[] = [\n            'User_ID'   => (int)$row['User_ID'],\n            'Member_ID' => $row['Member_ID'] !== null ? (int)$row['Member_ID'] : null,\n            'Username'  => $row['Username'],\n            'First_Name'=> $row['First_Name'] ?? '',\n            'Last_Name' => $row['Last_Name'] ?? '',\n            'Email'     => $row['Email'] ?? '',\n            'Phone'     => $row['Phone'] ?? null,\n            'Join_Date' => $row['Join_Date'] ?? null,\n            // Use the actual status from the database, defaulting to 'Inactive'\n            'Status'    => $row['STATUS'] ?? 'Inactive' \n        ];
     }
     $stmt->close();
 

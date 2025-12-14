@@ -1,7 +1,8 @@
 <?php
 header('Content-Type: application/json');
-include('../includes/db_connect.php');
-include('../includes/auth_admin.php');
+// Corrected include path
+include(__DIR__ . '/../includes/auth_admin.php');
+include(__DIR__ . '/../includes/db_connect.php');
 
 if (!isset($_GET['member_id'])) {
     http_response_code(400);
