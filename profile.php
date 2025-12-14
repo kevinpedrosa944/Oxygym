@@ -11,7 +11,22 @@ if (!empty($_GET['from']) && $_GET['from'] === 'login') {
 }
 
 // Get member details (without inline subscription join)
-$memberQuery = $conn->prepare("\n    SELECT \n        m.Member_ID,\n        m.First_Name,\n        m.Last_Name,\n        m.Email,\n        m.Phone,\n        m.Address,\n        m.Gender,\n        m.Birthdate,\n        m.Join_Date\n    FROM Users u\n    LEFT JOIN Members m ON u.Member_ID = m.Member_ID\n    WHERE u.Username = ?\n    LIMIT 1\n");
+$memberQuery = $conn->prepare("
+    SELECT 
+        m.Member_ID,
+        m.First_Name,
+        m.Last_Name,
+        m.Email,
+        m.Phone,
+        m.Address,
+        m.Gender,
+        m.Birthdate,
+        m.Join_Date
+    FROM Users u
+    LEFT JOIN Members m ON u.Member_ID = m.Member_ID
+    WHERE u.Username = ?
+    LIMIT 1
+");
 
 if (!$memberQuery) {
     die('Database error: ' . $conn->error);
@@ -32,7 +47,15 @@ $member = $result->fetch_assoc();
 $memberQuery->close();
 
 // Fetch latest active subscription for this member (most recent Start_Date)
-$subStmt = $conn->prepare("\n    SELECT sh.Start_Date, sh.End_Date, sh.Status as Subscription_Status,\n           mt.Name as Membership_Name, mt.Price, mt.Duration_Days\n    FROM Subscription_History sh\n    LEFT JOIN Membership_Types mt ON sh.Membership_ID = mt.Membership_ID\n    WHERE sh.Member_ID = ? AND sh.Status = 'Active'\n    ORDER BY sh.Start_Date DESC\n    LIMIT 1\n");
+$subStmt = $conn->prepare("
+    SELECT sh.Start_Date, sh.End_Date, sh.Status as Subscription_Status,
+           mt.Name as Membership_Name, mt.Price, mt.Duration_Days
+    FROM Subscription_History sh
+    LEFT JOIN Membership_Types mt ON sh.Membership_ID = mt.Membership_ID
+    WHERE sh.Member_ID = ? AND sh.Status = 'Active'
+    ORDER BY sh.Start_Date DESC
+    LIMIT 1
+");
 if ($subStmt) {
     $subStmt->bind_param("i", $member['Member_ID']);
     $subStmt->execute();
@@ -59,7 +82,13 @@ if ($subStmt) {
 }
 
 // Fetch user reviews
-$reviewStmt = $conn->prepare("\n    SELECT r.Review_ID, r.Rating, r.Comment, r.Review_Date, m.First_Name, m.Last_Name\n    FROM Reviews r\n    JOIN Members m ON r.Member_ID = m.Member_ID\n    WHERE r.Member_ID = ?\n    ORDER BY r.Review_Date DESC\n");
+$reviewStmt = $conn->prepare("
+    SELECT r.Review_ID, r.Rating, r.Comment, r.Review_Date, m.First_Name, m.Last_Name
+    FROM Reviews r
+    JOIN Members m ON r.Member_ID = m.Member_ID
+    WHERE r.Member_ID = ?
+    ORDER BY r.Review_Date DESC
+");
 $reviews = [];
 if ($reviewStmt) {
     $reviewStmt->bind_param("i", $member['Member_ID']);
