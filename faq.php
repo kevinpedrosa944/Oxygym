@@ -11,9 +11,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         /* FAQ specific overrides */
-        .faq-section { padding: 60px 0; }
+        .faq-section {
+            padding-top: 8rem; /* Pushes content below the fixed header */
+            padding-bottom: 3rem;
+        }
+        .faq-section h2 { /* Targeting the h2 within the section */
+            margin-bottom: 3rem; /* Added space below title */
+        }
         .faq-grid { max-width: 800px; margin: 0 auto; }
-        .faq-item { margin-bottom: 15px; }
+        .faq-item { margin-bottom: 20px; } /* Increased from 15px */
         .faq-toggle {
             width: 100%;
             display: flex;
@@ -22,16 +28,18 @@
             cursor: pointer;
             text-align: left;
             font-size: 1.1rem;
+            padding: 1rem; /* Added padding */
             transition: background 0.3s;
         }
         .faq-toggle i { transition: transform 0.3s; }
         .faq-content {
             display: none;
-            padding: 15px;
-            background: #f9f9f9;
+            padding: 25px; /* Increased from 15px */
+            background: #1f1f38; /* Dark card background */
+            color: #fff; /* White text */
             border-left: 3px solid #ff7f00;
             font-size: 1rem;
-            line-height: 1.5;
+            line-height: 1.7; /* Increased from 1.5 */
         }
         .faq-item.active .faq-toggle i { transform: rotate(180deg); }
         .faq-item.active .faq-content { display: block; }
@@ -47,6 +55,7 @@
                     <li><a href="index.html#about-section">About</a></li>
                     <li><a href="index.html#plan-section">Plans</a></li>
                     <li><a href="index.html#contact-section">Contact</a></li>
+                    <li><a href="faq.php">FAQ</a></li>
                 </ul>
             </nav>
             <div id="authButtons">
@@ -119,7 +128,7 @@
                 <div>
                     <h4>MEMBERS</h4>
                     <ul>
-                        <li><a href="faq.html">FAQs</a></li>
+                        <li><a href="faq.php">FAQs</a></li>
                         <li><a href="Login.html">Login</a></li>
                     </ul>
                 </div>

@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
             margin: 0;
@@ -134,6 +135,21 @@
             font-size: 1.2rem;
         }
 
+        .search-container {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .search-input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            width: 300px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -147,6 +163,22 @@
             font-weight: 600;
             color: #333;
             border-bottom: 2px solid #ddd;
+            cursor: pointer;
+            position: relative;
+        }
+
+        table th:hover {
+            background: #e0e0e0;
+        }
+
+        table th.sort-asc::after {
+            content: ' ▲';
+            font-size: 0.8rem;
+        }
+
+        table th.sort-desc::after {
+            content: ' ▼';
+            font-size: 0.8rem;
         }
 
         table td {
@@ -175,6 +207,15 @@
             margin-right: 5px;
             transition: all 0.3s;
             font-family: inherit;
+        }
+
+        .btn-edit {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #2563eb;
         }
 
         .btn-save {
@@ -255,20 +296,20 @@
         }
 
         .stat-card {
-            background: rgb(255, 255, 255);
+            background: rgba(255, 255, 255, 0.1);
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.788);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             text-align: center;
             backdrop-filter: blur(10px);
-            border: 1px solid rgb(245, 241, 241);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             transition: transform 0.3s ease;
         }
+
         .stat-card:hover {
             transform: translateY(-10px);
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
         }
-
 
         .stat-card .number {
             font-size: 3rem;
@@ -278,11 +319,18 @@
         }
 
         .stat-card .label {
-            color: #000000;
+            color: #ffffff;
             font-size: 1rem;
             font-weight: 500;
         }
 
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
 
         @media (max-width: 768px) {
             .sidebar {
@@ -295,6 +343,10 @@
 
             .main-content {
                 margin-left: 70px;
+            }
+
+            .search-input {
+                width: 200px;
             }
         }
     </style>
@@ -347,8 +399,7 @@
         <!-- Main Content -->
         <div class="main-content">
             <div class="header">
-                <h1 id="pageTitle">📊Dashboard</h1>
-
+                <h1 id="pageTitle">Dashboard</h1>
                 <a href="/Oxygym/logout.php" class="logout-btn">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </a>
@@ -373,6 +424,30 @@
                         <div class="number" id="totalReviews">0</div>
                         <div class="label">Total Reviews</div>
                     </div>
+                    <div class="stat-card">
+                        <div class="number" id="totalRevenue">₱0</div>
+                        <div class="label">Total Revenue</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="resubscriptions">0</div>
+                        <div class="label">Resubscriptions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="newUsers">0</div>
+                        <div class="label">New Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="newSubscribers">0</div>
+                        <div class="label">New Subscribers</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="availableCoaches">0</div>
+                        <div class="label">Available Coaches</div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h3>📈 Subscription Trends</h3>
+                    <canvas id="subscriptionChart"></canvas>
                 </div>
             </div>
 
@@ -383,19 +458,21 @@
                     <div id="errorMessage" class="error-message"></div>
 
                     <h3>👥 Manage Users & Assign Roles</h3>
-                    <table>
+                    <div class="search-container">
+                        <input type="text" id="search-users" class="search-input" placeholder="Search users...">
+                    </div>
+                    <table id="usersTable">
                         <thead>
                             <tr>
-                                <th>User ID</th>
-                                <th>Username</th>
-                                <th>Current Role</th>
-                                <th>Change Role</th>
-                                <th>Action</th>
+                                <th data-sort="User_ID">User ID</th>
+                                <th data-sort="Username">Username</th>
+                                <th data-sort="Role">Current Role</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="usersTable">
+                        <tbody>
                             <tr>
-                                <td colspan="5" style="text-align: center; color: #999;">Loading...</td>
+                                <td colspan="4" style="text-align: center; color: #999;">Loading...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -406,18 +483,21 @@
             <div id="members" class="content-section">
                 <div class="card">
                     <h3>👥 Members</h3>
-                    <table>
+                    <div class="search-container">
+                        <input type="text" id="search-members" class="search-input" placeholder="Search members...">
+                    </div>
+                    <table id="membersTable">
                         <thead>
                             <tr>
-                                <th>Member ID</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Join Date</th>
-                                <th>Status</th>
+                                <th data-sort="Member_ID">Member ID</th>
+                                <th data-sort="First_Name">Name</th>
+                                <th data-sort="Email">Email</th>
+                                <th data-sort="Phone">Phone</th>
+                                <th data-sort="Join_Date">Join Date</th>
+                                <th data-sort="Status">Status</th>
                             </tr>
                         </thead>
-                        <tbody id="membersTable">
+                        <tbody>
                             <tr>
                                 <td colspan="6" style="text-align: center; color: #999;">Loading...</td>
                             </tr>
@@ -430,18 +510,21 @@
             <div id="subscriptions" class="content-section">
                 <div class="card">
                     <h3>💳 Subscriptions</h3>
-                    <table>
+                    <div class="search-container">
+                        <input type="text" id="search-subscriptions" class="search-input" placeholder="Search subscriptions...">
+                    </div>
+                    <table id="subscriptionsTable">
                         <thead>
                             <tr>
-                                <th>Member</th>
-                                <th>Plan</th>
-                                <th>Price</th>
-                                <th>Start Date</th>
-                                <th>End Date</th>
-                                <th>Status</th>
+                                <th data-sort="member_name">Member</th>
+                                <th data-sort="Plan_Name">Plan</th>
+                                <th data-sort="Price">Price</th>
+                                <th data-sort="Start_Date">Start Date</th>
+                                <th data-sort="End_Date">End Date</th>
+                                <th data-sort="Status">Status</th>
                             </tr>
                         </thead>
-                        <tbody id="subscriptionsTable">
+                        <tbody>
                             <tr>
                                 <td colspan="6" style="text-align: center; color: #999;">Loading...</td>
                             </tr>
@@ -454,17 +537,20 @@
             <div id="reviews" class="content-section">
                 <div class="card">
                     <h3>⭐ Member Reviews</h3>
-                    <table>
+                    <div class="search-container">
+                        <input type="text" id="search-reviews" class="search-input" placeholder="Search reviews...">
+                    </div>
+                    <table id="reviewsTable">
                         <thead>
                             <tr>
-                                <th>Review ID</th>
-                                <th>Member</th>
-                                <th>Rating</th>
-                                <th>Title</th>
-                                <th>Date</th>
+                                <th data-sort="Review_ID">Review ID</th>
+                                <th data-sort="member_name">Member</th>
+                                <th data-sort="Rating">Rating</th>
+                                <th data-sort="Title">Title</th>
+                                <th data-sort="Created_At">Date</th>
                             </tr>
                         </thead>
-                        <tbody id="reviewsTable">
+                        <tbody>
                             <tr>
                                 <td colspan="5" style="text-align: center; color: #999;">Loading...</td>
                             </tr>
@@ -476,6 +562,13 @@
     </div>
 
     <script>
+        let currentData = {
+            users: [],
+            members: [],
+            subscriptions: [],
+            reviews: []
+        };
+
         // Navigation
         document.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', (e) => {
@@ -502,7 +595,7 @@
             document.getElementById('pageTitle').textContent = titles[sectionId];
 
             if (sectionId === 'users') loadUsers();
-            else if (sectionId === 'members') loadMembers();
+            else if (sectionId === 'members');
             else if (sectionId === 'subscriptions') loadSubscriptions();
             else if (sectionId === 'reviews') loadReviews();
             else if (sectionId === 'dashboard') loadDashboard();
