@@ -596,7 +596,7 @@
             document.getElementById('pageTitle').textContent = titles[sectionId];
 
             if (sectionId === 'users') loadUsers();
-            else if (sectionId === 'members');
+            else if (sectionId === 'members') loadMembers();
             else if (sectionId === 'subscriptions') loadSubscriptions();
             else if (sectionId === 'reviews') loadReviews();
             else if (sectionId === 'dashboard') loadDashboard();
@@ -706,7 +706,7 @@
                     data.members.forEach(member => {
                         tbody.innerHTML += `
                             <tr>
-                                <td>${member.Member_.ID}</td>
+                                <td>${member.Member_ID}</td>
                                 <td>${member.First_Name} ${member.Last_Name}</td>
                                 <td>${member.Email}</td>
                                 <td>${member.Phone || 'N/A'}</td>
