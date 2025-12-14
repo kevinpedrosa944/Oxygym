@@ -100,6 +100,14 @@ if ($reviewStmt) {
     $reviewStmt->close();
 }
 
+// FIX: Add a guard clause for invalid End_Date before using it
+if (empty($member['End_Date']) || !strtotime($member['End_Date'])) {
+    // If End_Date is null, empty, or not a valid date string, redirect to prevent fatal error.
+    $conn->close();
+    header("Location: /Oxygym/pages/subs.php");
+    exit();
+}
+
 
 // Calculate days remaining - CORRECTED
 $today = new DateTime(); // Today's date
