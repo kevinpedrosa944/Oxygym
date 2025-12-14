@@ -115,7 +115,6 @@ $conn->close();
     <title>My Profile - OxyGym</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="assets/css/profile.css">
-    <link rel="stylesheet" href="assets/css/profile-white.css">
     <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>

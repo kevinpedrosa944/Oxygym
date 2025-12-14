@@ -1,6 +1,6 @@
 /* assets/css/profile.css */
 
-:root {
+.profile-container {
     --primary-color: #ffcc00; /* gold-yellow */
     --secondary-color: #ffa500;
     --background-color: #1a1a2e; /* dark-navy */
@@ -14,19 +14,12 @@
     --font-family: 'Poppins', sans-serif;
     --border-radius: 12px;
     --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-}
 
-body {
-    background-color: var(--background-color);
-    font-family: var(--font-family);
-    color: var(--text-color);
-    line-height: 1.6;
-}
-
-.profile-container {
     max-width: 1100px;
     margin: 100px auto 2rem auto;
     padding: 0 1rem;
+    font-family: var(--font-family);
+    color: var(--text-color);
 }
 
 /* Profile Header */
