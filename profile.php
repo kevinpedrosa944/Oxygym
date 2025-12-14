@@ -58,6 +58,20 @@ if ($subStmt) {
     die('Database error: ' . $conn->error);
 }
 
+// Fetch user reviews
+$reviewStmt = $conn->prepare("\n    SELECT r.Review_ID, r.Rating, r.Comment, r.Review_Date, m.First_Name, m.Last_Name\n    FROM Reviews r\n    JOIN Members m ON r.Member_ID = m.Member_ID\n    WHERE r.Member_ID = ?\n    ORDER BY r.Review_Date DESC\n");
+$reviews = [];
+if ($reviewStmt) {
+    $reviewStmt->bind_param("i", $member['Member_ID']);
+    $reviewStmt->execute();
+    $reviewResult = $reviewStmt->get_result();
+    while ($row = $reviewResult->fetch_assoc()) {
+        $reviews[] = $row;
+    }
+    $reviewStmt->close();
+}
+
+
 // Calculate days remaining - CORRECTED
 $today = new DateTime(); // Today's date
 $endDate = new DateTime($member['End_Date']); // Subscription end date
@@ -114,8 +128,8 @@ $conn->close();
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <title>My Profile - OxyGym</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/styles.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="assets/css/profile.css?v=<?php echo time(); ?>">
-    <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
     <header>
@@ -242,6 +256,30 @@ $conn->close();
                 </div>
             </div>
         </section>
+        
+        <!-- User Reviews Section -->
+        <section class="info-section">
+            <h2><i class="fas fa-star"></i> My Reviews</h2>
+            <?php if (empty($reviews)): ?>
+                <p>You haven't left any reviews yet.</p>
+            <?php else: ?>
+                <div class="reviews-grid">
+                    <?php foreach ($reviews as $review): ?>
+                        <div class="review-card">
+                            <div class="review-header">
+                                <div class="review-rating">
+                                    <?php for ($i = 0; $i < 5; $i++): ?>
+                                        <i class="fas fa-star <?= $i < $review['Rating'] ? 'rated' : '' ?>"></i>
+                                    <?php endfor; ?>
+                                </div>
+                                <div class="review-date"><?= date('M d, Y', strtotime($review['Review_Date'])) ?></div>
+                            </div>
+                            <p class="review-comment"><?= htmlspecialchars($review['Comment']) ?></p>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </section>
 
 
         <!-- Action Buttons -->
@@ -251,6 +289,9 @@ $conn->close();
             </a>
             <a href="/Oxygym/pages/subs.php" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Renew Subscription
+            </a>
+            <a href="/Oxygym/pages/review.php" class="btn btn-secondary">
+                <i class="fas fa-star"></i> Leave a Review
             </a>
             <a href="#" class="btn btn-danger" onclick="handleLogout(event)">
                 <i class="fas fa-sign-out-alt"></i> Logout
