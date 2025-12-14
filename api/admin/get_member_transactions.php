@@ -1,45 +1,32 @@
 <?php
 header('Content-Type: application/json');
-// Corrected include path
-include(__DIR__ . '/../includes/auth_admin.php');
-include(__DIR__ . '/../includes/db_connect.php');
+// Use absolute path for includes
+include_once __DIR__ . '/../../includes/db_connect.php';
 
-if (!isset($_GET['member_id'])) {
+$memberId = isset($_GET['member_id']) ? (int)$_GET['member_id'] : 0;
+
+if ($memberId <= 0) {
     http_response_code(400);
-    echo json_encode(['error' => 'Member ID is required.']);
+    echo json_encode([]); // Return empty array for invalid ID
     exit();
 }
 
-$memberId = (int)$_GET['member_id'];
+try {
+    $stmt = $conn->prepare("\n        SELECT \n            th.Transaction_Date, \n            th.Amount, \n            mt.Name AS Membership_Name, \n            th.Status\n        FROM Transaction_History th\n        JOIN Membership_Types mt ON th.Membership_ID = mt.Membership_ID\n        WHERE th.Member_ID = ?\n        ORDER BY th.Transaction_Date DESC\n    ");
+    $stmt->bind_param("i", $memberId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $transactions = $result->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
 
-$query = "
-    SELECT 
-        t.Transaction_ID, 
-        t.Amount, 
-        t.Transaction_Date, 
-        t.Status, 
-        mt.Name as Membership_Name
-    FROM Transactions t
-    LEFT JOIN Subscription_History sh ON t.Subscription_ID = sh.Subscription_ID
-    LEFT JOIN Membership_Types mt ON sh.Membership_ID = mt.Membership_ID
-    WHERE t.Member_ID = ?
-    ORDER BY t.Transaction_Date DESC;
-";
+    echo json_encode($transactions);
 
-$stmt = $conn->prepare($query);
-$stmt->bind_param("i", $memberId);
-$stmt->execute();
-$result = $stmt->get_result();
-
-$transactions = [];
-if ($result) {
-    while ($row = $result->fetch_assoc()) {
-        $transactions[] = $row;
-    }
+} catch (Exception $e) {
+    http_response_code(500);
+    // In case of an error, return a JSON object with an error message
+    // This helps the frontend to understand what went wrong.
+    echo json_encode(['error' => 'Database query failed: ' . $e->getMessage()]);
 }
 
-$stmt->close();
 $conn->close();
-
-echo json_encode($transactions);
 ?>

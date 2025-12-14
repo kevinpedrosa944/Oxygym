@@ -1,52 +1,34 @@
 <?php
 header('Content-Type: application/json');
-// Corrected include path
-include(__DIR__ . '/../includes/auth_admin.php');
-include(__DIR__ . '/../includes/db_connect.php');
+// Use absolute path for includes
+include_once __DIR__ . '/../../includes/db_connect.php';
 
-if (!isset($_GET['member_id'])) {
+$memberId = isset($_GET['member_id']) ? (int)$_GET['member_id'] : 0;
+
+if ($memberId <= 0) {
     http_response_code(400);
-    echo json_encode(['error' => 'Member ID is required.']);
+    echo json_encode(['error' => 'Invalid member ID']);
     exit();
 }
 
-$memberId = (int)$_GET['member_id'];
+try {
+    $stmt = $conn->prepare("SELECT * FROM Members WHERE Member_ID = ?");
+    $stmt->bind_param("i", $memberId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $member = $result->fetch_assoc();
+    $stmt->close();
 
-$query = "
-    SELECT 
-        m.Member_ID, 
-        m.First_Name, 
-        m.Last_Name, 
-        m.Email, 
-        m.Phone,
-        m.Address,
-        m.Join_Date
-    FROM Members m
-    WHERE m.Member_ID = ?;
-";
-
-$stmt = $conn->prepare($query);
-if (!$stmt) {
+    if ($member) {
+        echo json_encode($member);
+    } else {
+        http_response_code(404);
+        echo json_encode(['error' => 'Member not found']);
+    }
+} catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'Database query failed: ' . $conn->error]);
-    exit();
+    echo json_encode(['error' => 'Database error: ' . $e->getMessage()]);
 }
 
-$stmt->bind_param("i", $memberId);
-$stmt->execute();
-$result = $stmt->get_result();
-
-$memberDetails = null;
-if ($result && $result->num_rows > 0) {
-    $memberDetails = $result->fetch_assoc();
-} else {
-    http_response_code(404);
-    echo json_encode(['error' => 'Member not found.']);
-    exit();
-}
-
-$stmt->close();
 $conn->close();
-
-echo json_encode($memberDetails);
 ?>
