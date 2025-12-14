@@ -108,11 +108,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
             $subStmt->close();
 
             // Log the transaction
-            $transStmt = $conn->prepare("INSERT INTO Transactions (Member_ID, Subscription_ID, Amount, Transaction_Date, Status) VALUES (?, ?, ?, NOW(), 'Completed')");
+            $transStmt = $conn->prepare("INSERT INTO Transactions (Member_ID, Amount, Payment_Method, Status) VALUES (?, ?, 'Cash', 'Paid')");
             if ($transStmt) {
-                $transStmt->bind_param("iid", $memberId, $subscriptionId, $price);
+                $transStmt->bind_param("id", $memberId, $price);
                 $transStmt->execute();
+                $transactionId = $transStmt->insert_id;
                 $transStmt->close();
+
+                // Link transaction to subscription
+                $updateSub = $conn->prepare("UPDATE Subscription_History SET Transaction_ID = ? WHERE Subscription_ID = ?");
+                if ($updateSub) {
+                    $updateSub->bind_param("ii", $transactionId, $subscriptionId);
+                    $updateSub->execute();
+                    $updateSub->close();
+                }
             }
             
             // Redirect to profile
