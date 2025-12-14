@@ -6,6 +6,8 @@ include('../includes/auth.php');
 
 // Fetch existing member details to prefill the form
 $firstName = $lastName = $phone = $address = $birthday = $gender = '';
+$age = '';
+$errors = [];
 $memberId = null;
 
 $fetchStmt = $conn->prepare("
@@ -43,95 +45,129 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
     $age = sanitizeInput($_POST['age'] ?? '');
     $gender = sanitizeInput($_POST['gender'] ?? '');
     $phone = sanitizeInput($_POST['phone'] ?? '');
-    
-    // Map plan name to Membership_ID
-    $planMap = ['Standard' => 1, 'Prime' => 2, 'Premium' => 3];
-    $planId = $planMap[$plan] ?? 1;
-    
-    // Get member ID from username
-    $stmt = $conn->prepare("SELECT Member_ID FROM Users WHERE Username = ?");
-    if (!$stmt) {
-        die('Database error: ' . $conn->error);
+
+    // Server-side validation: all fields required
+    if (empty($plan)) $errors[] = 'Please select a plan.';
+    if (empty($firstName)) $errors[] = 'First name is required.';
+    if (empty($lastName)) $errors[] = 'Last name is required.';
+    if (empty($phone)) $errors[] = 'Phone number is required.';
+    if (empty($address)) $errors[] = 'Address is required.';
+    if (empty($birthday)) $errors[] = 'Birthday is required.';
+    if (empty($gender)) $errors[] = 'Gender is required.';
+
+    // compute age server-side from birthday if possible
+    function calculateAgePHP($birthdate) {
+        if (empty($birthdate)) return null;
+        try {
+            $b = new DateTime($birthdate);
+            $today = new DateTime();
+            return $today->diff($b)->y;
+        } catch (Exception $e) {
+            return null;
+        }
     }
-    
-    $stmt->bind_param("s", $_SESSION['username']);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        $memberId = $row['Member_ID'];
-        
-        // Update member details (store first/last name, phone, address, birthdate, gender)
-        $updateMember = $conn->prepare("UPDATE Members SET First_Name = ?, Last_Name = ?, Phone = ?, Address = ?, Birthdate = ?, Gender = ? WHERE Member_ID = ?");
-        if ($updateMember) {
-            $updateMember->bind_param("ssssssi", $firstName, $lastName, $phone, $address, $birthday, $gender, $memberId);
-            $updateMember->execute();
-            $updateMember->close();
+
+    $computedAge = calculateAgePHP($birthday);
+    if ($computedAge === null) {
+        $errors[] = 'Invalid birthday provided.';
+    } else {
+        $age = (string)$computedAge;
+        if ($computedAge < 14) {
+            $errors[] = 'You must be at least 14 years old to subscribe.';
         }
-        
-        // Mark any existing active subscriptions as Expired before inserting a new one
-        $expireStmt = $conn->prepare("UPDATE Subscription_History SET Status = 'Expired' WHERE Member_ID = ? AND Status = 'Active'");
-        if ($expireStmt) {
-            $expireStmt->bind_param("i", $memberId);
-            $expireStmt->execute();
-            $expireStmt->close();
+    }
+
+    // If validation passed, proceed with DB operations
+    if (empty($errors)) {
+        // Map plan name to Membership_ID
+        $planMap = ['Standard' => 1, 'Prime' => 2, 'Premium' => 3];
+        $planId = $planMap[$plan] ?? 1;
+
+        // Get member ID from username
+        $stmt = $conn->prepare("SELECT Member_ID FROM Users WHERE Username = ?");
+        if (!$stmt) {
+            die('Database error: ' . $conn->error);
         }
 
-        // Get duration and price for the selected plan to calculate the correct end date
-        $durationDays = 30; // Default to 30 days
-        $price = 0;
-        $durationStmt = $conn->prepare("SELECT Duration_Days, Price FROM Membership_Types WHERE Membership_ID = ?");
-        if ($durationStmt) {
-            $durationStmt->bind_param("i", $planId);
-            $durationStmt->execute();
-            $durationResult = $durationStmt->get_result();
-            if ($durationResult->num_rows > 0) {
-                $durationRow = $durationResult->fetch_assoc();
-                $durationDays = (int)$durationRow['Duration_Days'];
-                $price = (float)$durationRow['Price'];
+        $stmt->bind_param("s", $_SESSION['username']);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $memberId = $row['Member_ID'];
+
+            // Update member details (store first/last name, phone, address, birthdate, gender)
+            $updateMember = $conn->prepare("UPDATE Members SET First_Name = ?, Last_Name = ?, Phone = ?, Address = ?, Birthdate = ?, Gender = ? WHERE Member_ID = ?");
+            if ($updateMember) {
+                $updateMember->bind_param("ssssssi", $firstName, $lastName, $phone, $address, $birthday, $gender, $memberId);
+                $updateMember->execute();
+                $updateMember->close();
             }
-            $durationStmt->close();
-        }
-        
-        // Insert subscription record with the correct end date
-        $startDate = date('Y-m-d');
-        $endDate = date('Y-m-d', strtotime("+$durationDays days"));
-        
-        $subStmt = $conn->prepare("INSERT INTO Subscription_History (Member_ID, Membership_ID, Start_Date, End_Date, Status) 
-                                   VALUES (?, ?, ?, ?, 'Active')");
-        
-        if ($subStmt) {
-            $subStmt->bind_param("iiss", $memberId, $planId, $startDate, $endDate);
-            $subStmt->execute();
-            $subscriptionId = $subStmt->insert_id;
-            $subStmt->close();
 
-            // Log the transaction
-            $transStmt = $conn->prepare("INSERT INTO Transactions (Member_ID, Amount, Payment_Method, Status) VALUES (?, ?, 'Cash', 'Paid')");
-            if ($transStmt) {
-                $transStmt->bind_param("id", $memberId, $price);
-                $transStmt->execute();
-                $transactionId = $transStmt->insert_id;
-                $transStmt->close();
+            // Mark any existing active subscriptions as Expired before inserting a new one
+            $expireStmt = $conn->prepare("UPDATE Subscription_History SET Status = 'Expired' WHERE Member_ID = ? AND Status = 'Active'");
+            if ($expireStmt) {
+                $expireStmt->bind_param("i", $memberId);
+                $expireStmt->execute();
+                $expireStmt->close();
+            }
 
-                // Link transaction to subscription
-                $updateSub = $conn->prepare("UPDATE Subscription_History SET Transaction_ID = ? WHERE Subscription_ID = ?");
-                if ($updateSub) {
-                    $updateSub->bind_param("ii", $transactionId, $subscriptionId);
-                    $updateSub->execute();
-                    $updateSub->close();
+            // Get duration and price for the selected plan to calculate the correct end date
+            $durationDays = 30; // Default to 30 days
+            $price = 0;
+            $durationStmt = $conn->prepare("SELECT Duration_Days, Price FROM Membership_Types WHERE Membership_ID = ?");
+            if ($durationStmt) {
+                $durationStmt->bind_param("i", $planId);
+                $durationStmt->execute();
+                $durationResult = $durationStmt->get_result();
+                if ($durationResult->num_rows > 0) {
+                    $durationRow = $durationResult->fetch_assoc();
+                    $durationDays = (int)$durationRow['Duration_Days'];
+                    $price = (float)$durationRow['Price'];
                 }
+                $durationStmt->close();
             }
-            
-            // Redirect to profile
-            $stmt->close();
-            $conn->close();
-            header("Location: /Oxygym/profile.php");
-            exit();
+
+            // Insert subscription record with the correct end date
+            $startDate = date('Y-m-d');
+            $endDate = date('Y-m-d', strtotime("+$durationDays days"));
+
+            $subStmt = $conn->prepare("INSERT INTO Subscription_History (Member_ID, Membership_ID, Start_Date, End_Date, Status) 
+                                       VALUES (?, ?, ?, ?, 'Active')");
+
+            if ($subStmt) {
+                $subStmt->bind_param("iiss", $memberId, $planId, $startDate, $endDate);
+                $subStmt->execute();
+                $subscriptionId = $subStmt->insert_id;
+                $subStmt->close();
+
+                // Log the transaction
+                $transStmt = $conn->prepare("INSERT INTO Transactions (Member_ID, Amount, Payment_Method, Status) VALUES (?, ?, 'Cash', 'Paid')");
+                if ($transStmt) {
+                    $transStmt->bind_param("id", $memberId, $price);
+                    $transStmt->execute();
+                    $transactionId = $transStmt->insert_id;
+                    $transStmt->close();
+
+                    // Link transaction to subscription
+                    $updateSub = $conn->prepare("UPDATE Subscription_History SET Transaction_ID = ? WHERE Subscription_ID = ?");
+                    if ($updateSub) {
+                        $updateSub->bind_param("ii", $transactionId, $subscriptionId);
+                        $updateSub->execute();
+                        $updateSub->close();
+                    }
+                }
+
+                // Redirect to profile
+                $stmt->close();
+                $conn->close();
+                header("Location: /Oxygym/profile.php");
+                exit();
+            }
         }
+        $stmt->close();
     }
-    $stmt->close();
 }
 
 $conn->close();
@@ -289,9 +325,11 @@ $conn->close();
             font-weight: bold;
             font-size: 1.2rem;
         }
-</style>
 
-
+        /* Add CSS for age preview */
+        .age-preview { margin-top: 0.5rem; font-weight: 600; font-size: 0.95rem; }
+        .age-preview.ok { color: #16a34a; }      /* green for eligible */
+        .age-preview.warn { color: #dc2626; }    /* red for underage/invalid */
 </style>
 
 </head>
@@ -314,6 +352,16 @@ $conn->close();
     <div class="subs-container">
         <div class="form-section">
             <h2>Complete Your Subscription</h2>
+            <!-- Error display -->
+            <?php if (!empty($errors)): ?>
+                <div class="error-messages" style="background:#fee2e2;border:1px solid #fca5a5;padding:0.75rem;border-radius:6px;margin-bottom:1rem;color:#7f1d1d;">
+                    <ul style="margin:0;padding-left:1.25rem;">
+                        <?php foreach ($errors as $err): ?>
+                            <li><?= htmlspecialchars($err) ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
             <p style="color: #666; margin-bottom: 1.5rem;">Welcome, <strong><?= htmlspecialchars($_SESSION['username']) ?></strong>! Fill out the form to complete your subscription.</p>
 
             <form method="POST">
@@ -322,7 +370,7 @@ $conn->close();
                     <label>Select Your Plan *</label>
                     <div class="plan-options">
                         <label class="plan-option">
-                            <input type="radio" name="plan" value="Standard" required>
+                            <input type="radio" name="plan" value="Standard" required <?= (isset($plan) && $plan==='Standard') ? 'checked' : '' ?>>
                             <div class="plan-label">
                                 <h3>STANDARD</h3>
                                 <p>₱999/month</p>
@@ -330,7 +378,7 @@ $conn->close();
                         </label>
 
                         <label class="plan-option">
-                            <input type="radio" name="plan" value="Prime">
+                            <input type="radio" name="plan" value="Prime" required <?= (isset($plan) && $plan==='Prime') ? 'checked' : '' ?>>
                             <div class="plan-label">
                                 <h3>PRIME</h3>
                                 <p>₱1,499/month</p>
@@ -338,7 +386,7 @@ $conn->close();
                         </label>
 
                         <label class="plan-option">
-                            <input type="radio" name="plan" value="Premium">
+                            <input type="radio" name="plan" value="Premium" required <?= (isset($plan) && $plan==='Premium') ? 'checked' : '' ?>>
                             <div class="plan-label">
                                 <h3>PREMIUM</h3>
                                 <p>₱14,999/year</p>
@@ -371,11 +419,13 @@ $conn->close();
                 <div class="form-group">
                     <label for="birthday">Birthday *</label>
                     <input type="date" id="birthday" name="birthday" required value="<?= htmlspecialchars($birthday) ?>">
+                    <!-- Live age preview (updates even before submission) -->
+                    <div id="agePreview" class="age-preview" aria-live="polite"></div>
                 </div>
 
                 <div class="form-group">
                     <label for="age">Age *</label>
-                    <input type="number" id="age" name="age" placeholder="25" min="18" required value="" readonly>
+                    <input type="number" id="age" name="age" placeholder="25" min="14" required value="<?= htmlspecialchars($age) ?>" readonly>
                 </div>
 
                 <div class="form-group">
@@ -404,15 +454,18 @@ $conn->close();
             window.location.href = '/Oxygym/logout.php';
         }
 
-        // Auto-calculate age from birthdate and populate the age input
+        // Real-time age calculation and visual preview
         (function() {
             const birthdayEl = document.getElementById('birthday');
             const ageEl = document.getElementById('age');
+            const previewEl = document.getElementById('agePreview');
+            const MIN_AGE = 14;
 
             function calculateAge(birthdate) {
                 if (!birthdate) return '';
                 const today = new Date();
-                const b = new Date(birthdate);
+                const b = new Date(birthdate + 'T00:00:00'); // avoid timezone shift
+                if (isNaN(b)) return '';
                 let age = today.getFullYear() - b.getFullYear();
                 const m = today.getMonth() - b.getMonth();
                 if (m < 0 || (m === 0 && today.getDate() < b.getDate())) {
@@ -421,24 +474,32 @@ $conn->close();
                 return age >= 0 ? age : '';
             }
 
-            function updateAge() {
+            function updateAgeVisual() {
                 const val = birthdayEl.value;
                 const age = calculateAge(val);
-                if (age !== '') {
-                    ageEl.value = age;
+
+                // update readonly age input
+                ageEl.value = age !== '' ? age : '';
+
+                // update preview message and styling
+                if (age === '') {
+                    previewEl.textContent = 'Enter your birthday to see your age.';
+                    previewEl.className = 'age-preview';
+                } else if (age < MIN_AGE) {
+                    previewEl.textContent = `Age: ${age} — Not eligible (minimum ${MIN_AGE})`;
+                    previewEl.className = 'age-preview warn';
                 } else {
-                    ageEl.value = '';
+                    previewEl.textContent = `Age: ${age} — Eligible`;
+                    previewEl.className = 'age-preview ok';
                 }
             }
 
-            birthdayEl.addEventListener('change', updateAge);
+            // update on both input and change for real-time feedback
+            birthdayEl.addEventListener('input', updateAgeVisual);
+            birthdayEl.addEventListener('change', updateAgeVisual);
 
-            // Initialize on load if there's a prefilled birthday
-            document.addEventListener('DOMContentLoaded', function() {
-                if (birthdayEl.value) {
-                    updateAge();
-                }
-            });
+            // initialize on load
+            document.addEventListener('DOMContentLoaded', updateAgeVisual);
         })();
     </script>
 </body>
