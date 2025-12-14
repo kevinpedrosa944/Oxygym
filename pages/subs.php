@@ -70,18 +70,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
             $updateMember->close();
         }
         
-        // --- NEW: mark any existing active subscriptions as Expired before inserting a new one ---
+        // Mark any existing active subscriptions as Expired before inserting a new one
         $expireStmt = $conn->prepare("UPDATE Subscription_History SET Status = 'Expired' WHERE Member_ID = ? AND Status = 'Active'");
         if ($expireStmt) {
             $expireStmt->bind_param("i", $memberId);
             $expireStmt->execute();
             $expireStmt->close();
         }
-        // --- end NEW ---
+
+        // Get duration and price for the selected plan to calculate the correct end date
+        $durationDays = 30; // Default to 30 days
+        $price = 0;
+        $durationStmt = $conn->prepare("SELECT Duration_Days, Price FROM Membership_Types WHERE Membership_ID = ?");
+        if ($durationStmt) {
+            $durationStmt->bind_param("i", $planId);
+            $durationStmt->execute();
+            $durationResult = $durationStmt->get_result();
+            if ($durationResult->num_rows > 0) {
+                $durationRow = $durationResult->fetch_assoc();
+                $durationDays = (int)$durationRow['Duration_Days'];
+                $price = (float)$durationRow['Price'];
+            }
+            $durationStmt->close();
+        }
         
-        // Insert subscription record
+        // Insert subscription record with the correct end date
         $startDate = date('Y-m-d');
-        $endDate = date('Y-m-d', strtotime('+30 days'));
+        $endDate = date('Y-m-d', strtotime("+$durationDays days"));
         
         $subStmt = $conn->prepare("INSERT INTO Subscription_History (Member_ID, Membership_ID, Start_Date, End_Date, Status) 
                                    VALUES (?, ?, ?, ?, 'Active')");
@@ -89,7 +104,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
         if ($subStmt) {
             $subStmt->bind_param("iiss", $memberId, $planId, $startDate, $endDate);
             $subStmt->execute();
+            $subscriptionId = $subStmt->insert_id;
             $subStmt->close();
+
+            // Log the transaction
+            $transStmt = $conn->prepare("INSERT INTO Transactions (Member_ID, Subscription_ID, Amount, Transaction_Date, Status) VALUES (?, ?, ?, NOW(), 'Completed')");
+            if ($transStmt) {
+                $transStmt->bind_param("iid", $memberId, $subscriptionId, $price);
+                $transStmt->execute();
+                $transStmt->close();
+            }
             
             // Redirect to profile
             $stmt->close();

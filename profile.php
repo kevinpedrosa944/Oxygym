@@ -11,22 +11,7 @@ if (!empty($_GET['from']) && $_GET['from'] === 'login') {
 }
 
 // Get member details (without inline subscription join)
-$memberQuery = $conn->prepare("
-    SELECT 
-        m.Member_ID,
-        m.First_Name,
-        m.Last_Name,
-        m.Email,
-        m.Phone,
-        m.Address,
-        m.Gender,
-        m.Birthdate,
-        m.Join_Date
-    FROM Users u
-    LEFT JOIN Members m ON u.Member_ID = m.Member_ID
-    WHERE u.Username = ?
-    LIMIT 1
-");
+$memberQuery = $conn->prepare("\n    SELECT \n        m.Member_ID,\n        m.First_Name,\n        m.Last_Name,\n        m.Email,\n        m.Phone,\n        m.Address,\n        m.Gender,\n        m.Birthdate,\n        m.Join_Date\n    FROM Users u\n    LEFT JOIN Members m ON u.Member_ID = m.Member_ID\n    WHERE u.Username = ?\n    LIMIT 1\n");
 
 if (!$memberQuery) {
     die('Database error: ' . $conn->error);
@@ -47,15 +32,7 @@ $member = $result->fetch_assoc();
 $memberQuery->close();
 
 // Fetch latest active subscription for this member (most recent Start_Date)
-$subStmt = $conn->prepare("
-    SELECT sh.Start_Date, sh.End_Date, sh.Status as Subscription_Status,
-           mt.Name as Membership_Name, mt.Price, mt.Duration_Days
-    FROM Subscription_History sh
-    LEFT JOIN Membership_Types mt ON sh.Membership_ID = mt.Membership_ID
-    WHERE sh.Member_ID = ? AND sh.Status = 'Active'
-    ORDER BY sh.Start_Date DESC
-    LIMIT 1
-");
+$subStmt = $conn->prepare("\n    SELECT sh.Start_Date, sh.End_Date, sh.Status as Subscription_Status,\n           mt.Name as Membership_Name, mt.Price, mt.Duration_Days\n    FROM Subscription_History sh\n    LEFT JOIN Membership_Types mt ON sh.Membership_ID = mt.Membership_ID\n    WHERE sh.Member_ID = ? AND sh.Status = 'Active'\n    ORDER BY sh.Start_Date DESC\n    LIMIT 1\n");
 if ($subStmt) {
     $subStmt->bind_param("i", $member['Member_ID']);
     $subStmt->execute();
@@ -109,6 +86,22 @@ if ($member['Birthdate']) {
     $age = $today->diff($birthdateObj)->y;
 }
 
+// Create user-friendly duration labels
+$durationInDays = $member['Duration_Days'] ?? 30;
+$priceLabel = 'per ' . $durationInDays . ' days';
+$durationValue = $durationInDays . ' days';
+
+if ($durationInDays >= 360) {
+    $priceLabel = 'per year';
+    $durationValue = '1 Year';
+} elseif ($durationInDays >= 85 && $durationInDays <= 95) {
+    $priceLabel = 'per quarter';
+    $durationValue = '1 Quarter';
+} elseif ($durationInDays >= 28 && $durationInDays <= 31) {
+    $priceLabel = 'per month';
+    $durationValue = '1 Month';
+}
+
 $conn->close();
 ?>
 <!DOCTYPE html>
@@ -130,6 +123,7 @@ $conn->close();
                 <ul>
                     <li><a href="/Oxygym/index.html#about-section">About</a></li>
                     <li><a href="/Oxygym/index.html#plan-section">Plan</a></li>
+                    <li><a href="faq.php">FAQ</a></li>
                 </ul>
             </nav>
             <div id="authButtons">
@@ -216,7 +210,7 @@ $conn->close();
                     </div>
                     <div class="subscription-stat">
                         <div class="stat-number">₱<?= number_format($member['Price'] ?? 0, 2) ?></div>
-                        <div class="stat-label">Price per <?= $member['Duration_Days'] ?? 30 ?> days</div>
+                        <div class="stat-label">Price <?= $priceLabel ?></div>
                     </div>
                     <div class="subscription-stat">
                         <div class="stat-number"><span class="status-badge <?= strtolower(htmlspecialchars($member['Subscription_Status'])) ?>"><?= htmlspecialchars($member['Subscription_Status']) ?></span></div>
@@ -236,7 +230,7 @@ $conn->close();
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Duration</span>
-                    <span class="detail-value"><?= $member['Duration_Days'] ?? 30 ?> days</span>
+                    <span class="detail-value"><?= $durationValue ?></span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Start Date</span>

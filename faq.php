@@ -11,7 +11,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         /* FAQ specific overrides */
-        .faq-section { padding: 60px 0; }
+        .faq-section {
+            padding-top: 8rem; /* Pushes content below the fixed header */
+            padding-bottom: 3rem;
+        }
         .faq-grid { max-width: 800px; margin: 0 auto; }
         .faq-item { margin-bottom: 15px; }
         .faq-toggle {
@@ -28,7 +31,8 @@
         .faq-content {
             display: none;
             padding: 15px;
-            background: #f9f9f9;
+            background: #1f1f38; /* Dark card background */
+            color: #fff; /* White text */
             border-left: 3px solid #ff7f00;
             font-size: 1rem;
             line-height: 1.5;
