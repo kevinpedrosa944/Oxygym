@@ -258,8 +258,8 @@
 
             try {
                 const [detailsRes, transRes] = await Promise.all([
-                    fetch(`/Oxygym/api/get_member_details.php?member_id=${memberId}`),
-                    fetch(`/Oxygym/api/get_member_transactions.php?member_id=${memberId}`)
+                    fetch(`/Oxygym/api/admin/get_member_details.php?member_id=${memberId}`),
+                    fetch(`/Oxygym/api/admin/get_member_transactions.php?member_id=${memberId}`)
                 ]);
 
                 if (!detailsRes.ok) throw new Error(`Failed to fetch member details: ${detailsRes.status}`);
@@ -319,8 +319,8 @@
                     data.subscriptions.forEach(sub => {
                         tbody.innerHTML += `
                             <tr>
-                                <td>${sub.First_Name} ${sub.Last_Name}</td>
-                                <td>${sub.Name}</td>
+                                <td>${sub.member_name}</td>
+                                <td>${sub.Plan_Name}</td>
                                 <td>₱${parseFloat(sub.Price).toFixed(2)}</td>
                                 <td>${sub.Start_Date}</td>
                                 <td>${sub.End_Date}</td>
