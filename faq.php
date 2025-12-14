@@ -129,7 +129,7 @@
                     <h4>MEMBERS</h4>
                     <ul>
                         <li><a href="faq.php">FAQs</a></li>
-                        <li><a href="Login.html">Login</a></li>
+                        <li><a href="logout.php">Logout</a></li>
                     </ul>
                 </div>
             </div>
