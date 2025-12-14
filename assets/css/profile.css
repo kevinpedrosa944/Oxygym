@@ -71,6 +71,11 @@
     border: 1px solid #dee2e6;
 }
 
+.info-section.two-column-layout .details-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem; /* Adjust gap between columns */
+}
+
 .info-section h2 {
     font-size: 1.6rem;
     font-weight: 600;
@@ -92,6 +97,10 @@
 .detail-item {
     display: flex;
     flex-direction: column;
+}
+
+.address-item {
+    grid-column: span 2; /* Make address span both columns */
 }
 
 .detail-label {
@@ -233,6 +242,14 @@
     .profile-header {
         flex-direction: column;
         text-align: center;
+    }
+
+    .info-section.two-column-layout .details-grid {
+        grid-template-columns: 1fr; /* Revert to single column on smaller screens */
+    }
+
+    .address-item {
+        grid-column: span 1; /* Address takes full width on smaller screens */
     }
 
     .details-grid {
