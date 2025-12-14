@@ -1,31 +1,32 @@
 /* assets/css/profile.css */
 
+/* White Theme for Profile Page */
 .profile-container {
-    --primary-color: #ffcc00; /* gold-yellow */
-    --secondary-color: #ffa500;
-    --background-color: #1a1a2e; /* dark-navy */
-    --card-background: #1f1f38;
-    --text-color: #ffffff;
-    --muted-text-color: #a0a09e; /* light-gray-brown */
+    --primary-color: #007bff; /* A more standard blue */
+    --secondary-color: #0056b3;
+    --background-color: #ffffff;
+    --card-background: #f8f9fa;
+    --text-color: #212529;
+    --muted-text-color: #6c757d;
     --white-color: #fff;
-    --danger-color: #e74c3c;
-    --success-color: #2ecc71;
-    --warning-color: #f39c12;
+    --danger-color: #dc3545;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
     --font-family: 'Poppins', sans-serif;
     --border-radius: 12px;
-    --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 
+    background-color: var(--background-color);
+    color: var(--text-color);
     max-width: 1100px;
     margin: 100px auto 2rem auto;
     padding: 0 1rem;
     font-family: var(--font-family);
-    color: var(--text-color);
 }
 
-/* Profile Header */
 .profile-header {
-    background: linear-gradient(135deg, #1f1f38, #2c2c54);
-    color: var(--white-color);
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    color: var(--text-color);
     padding: 2.5rem 2rem;
     border-radius: var(--border-radius);
     display: flex;
@@ -33,14 +34,14 @@
     gap: 2rem;
     margin-bottom: 2rem;
     box-shadow: var(--box-shadow);
-    border: 1px solid rgba(255, 204, 0, 0.2);
+    border: 1px solid #dee2e6;
 }
 
 .profile-avatar {
     width: 100px;
     height: 100px;
     border-radius: 50%;
-    background: rgba(255, 204, 0, 0.1);
+    background: rgba(0, 123, 255, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -61,14 +62,13 @@
     color: var(--muted-text-color);
 }
 
-/* Info Section */
 .info-section {
     background: var(--card-background);
     padding: 2rem;
     border-radius: var(--border-radius);
     margin-bottom: 2rem;
     box-shadow: var(--box-shadow);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid #dee2e6;
 }
 
 .info-section h2 {
@@ -79,11 +79,10 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid #dee2e6;
     padding-bottom: 1rem;
 }
 
-/* Details Grid */
 .details-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -114,12 +113,12 @@
     font-weight: 600;
 }
 
-/* Subscription Section */
 .subscription-section {
-    background: #1f1f38;
+    background: #ffffff;
     padding: 2rem;
     border-radius: var(--border-radius);
     margin-bottom: 2rem;
+    border: 1px solid #dee2e6;
 }
 
 .subscription-grid {
@@ -140,7 +139,6 @@
     font-size: 0.95rem;
 }
 
-/* Badges */
 .status-badge {
     padding: 0.5rem 1rem;
     border-radius: 6px;
@@ -160,26 +158,24 @@
     color: var(--white-color);
 }
 
-/* Warning Banner */
 .warning-banner {
-    background-color: rgba(243, 156, 18, 0.1);
+    background-color: rgba(255, 193, 7, 0.1);
     border-left: 4px solid var(--warning-color);
     padding: 1rem 1.5rem;
     border-radius: 8px;
     margin-bottom: 2rem;
-    color: #f39c12;
+    color: #856404;
     display: flex;
     align-items: center;
     gap: 1rem;
 }
 
 .warning-banner a {
-    color: #ffcc00;
+    color: #0056b3;
     font-weight: 600;
     text-decoration: underline;
 }
 
-/* Action Buttons */
 .action-buttons {
     display: flex;
     gap: 1rem;
@@ -201,13 +197,13 @@
 
 .btn-primary {
     background-color: var(--primary-color);
-    color: #111;
+    color: #fff;
 }
 
 .btn-primary:hover {
     background-color: var(--secondary-color);
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(255, 204, 0, 0.2);
+    box-shadow: 0 6px 15px rgba(0, 123, 255, 0.2);
 }
 
 .btn-danger {
@@ -216,12 +212,11 @@
 }
 
 .btn-danger:hover {
-    background-color: #c0392b;
+    background-color: #c82333;
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(231, 76, 60, 0.3);
+    box-shadow: 0 6px 15px rgba(220, 53, 69, 0.3);
 }
 
-/* Back Link */
 .back-link {
     text-align: center;
     margin-top: 2rem;

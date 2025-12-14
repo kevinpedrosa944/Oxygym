@@ -283,6 +283,42 @@
             font-weight: 500;
         }
 
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%;
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto; 
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; 
+            max-width: 600px;
+            border-radius: 8px;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
 
         @media (max-width: 768px) {
             .sidebar {
@@ -295,6 +331,10 @@
 
             .main-content {
                 margin-left: 70px;
+            }
+
+            .modal-content {
+                width: 95%;
             }
         }
     </style>
@@ -474,6 +514,14 @@
         </div>
     </div>
 
+    <!-- Member Details Modal -->
+    <div id="member-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
     <script>
         // Navigation
         document.querySelectorAll('.nav-link').forEach(link => {
@@ -610,7 +658,7 @@
                 if (data.members && data.members.length > 0) {
                     data.members.forEach(member => {
                         tbody.innerHTML += `
-                            <tr>
+                            <tr data-member-id="${member.Member_ID}" style="cursor: pointer;">
                                 <td>${member.Member_ID}</td>
                                 <td>${member.First_Name} ${member.Last_Name}</td>
                                 <td>${member.Email}</td>
@@ -713,6 +761,58 @@
             if (isAdmin) {
                 loadDashboard();
             }
+
+            const modal = document.getElementById('member-modal');
+            const modalBody = document.getElementById('modal-body');
+            const closeButton = document.querySelector('.close-button');
+            const membersTable = document.getElementById('membersTable');
+
+            membersTable.addEventListener('click', function(e) {
+                const row = e.target.closest('tr');
+                if (row && row.dataset.memberId) {
+                    openMemberModal(row.dataset.memberId);
+                }
+            });
+
+            function openMemberModal(memberId) {
+                Promise.all([
+                    fetch(`/Oxygym/api/get_member_details.php?member_id=${memberId}`).then(res => res.json()),
+                    fetch(`/Oxygym/api/get_member_transactions.php?member_id=${memberId}`).then(res => res.json())
+                ]).then(([memberDetails, transactions]) => {
+                    let content = `<h3>${memberDetails.First_Name} ${memberDetails.Last_Name}</h3>`;
+                    content += `<p><strong>Email:</strong> ${memberDetails.Email}</p>`;
+                    content += `<p><strong>Phone:</strong> ${memberDetails.Phone}</p>`;
+                    content += `<p><strong>Address:</strong> ${memberDetails.Address}</p>`;
+                    content += `<p><strong>Join Date:</strong> ${memberDetails.Join_Date}</p>`;
+                    
+                    content += '<h4>Transaction History</h4>';
+                    if (transactions.length > 0) {
+                        content += '<table>';
+                        content += '<tr><th>Date</th><th>Amount</th><th>Plan</th><th>Status</th></tr>';
+                        transactions.forEach(t => {
+                            content += `<tr>`;
+                            content += `<td>${t.Transaction_Date}</td>`;
+                            content += `<td>₱${t.Amount}</td>`;
+                            content += `<td>${t.Membership_Name}</td>`;
+                            content += `<td>${t.Status}</td>`;
+                            content += `</tr>`;
+                        });
+                        content += '</table>';
+                    } else {
+                        content += '<p>No transactions found.</p>';
+                    }
+
+                    modalBody.innerHTML = content;
+                    modal.style.display = 'block';
+                });
+            }
+
+            closeButton.onclick = () => modal.style.display = 'none';
+            window.onclick = (event) => {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            };
         });
     </script>
 </body>
