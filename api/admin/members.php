@@ -5,7 +5,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-include('../../includes/db_connect.php');
+// Use absolute path for includes
+include_once __DIR__ . '/../../includes/db_connect.php';
 
 // simple session/role check (avoid includes/auth.php redirection/output)
 if (empty($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
@@ -21,7 +22,17 @@ try {
     $res = $stmt->get_result();
     $members = [];
     while ($row = $res->fetch_assoc()) {
-        $members[] = [\n            'User_ID'   => (int)$row['User_ID'],\n            'Member_ID' => $row['Member_ID'] !== null ? (int)$row['Member_ID'] : null,\n            'Username'  => $row['Username'],\n            'First_Name'=> $row['First_Name'] ?? '',\n            'Last_Name' => $row['Last_Name'] ?? '',\n            'Email'     => $row['Email'] ?? '',\n            'Phone'     => $row['Phone'] ?? null,\n            'Join_Date' => $row['Join_Date'] ?? null,\n            // Use the actual status from the database, defaulting to 'Inactive'\n            'Status'    => $row['STATUS'] ?? 'Inactive' \n        ];
+        $members[] = [
+            'User_ID'   => (int)$row['User_ID'],
+            'Member_ID' => $row['Member_ID'] !== null ? (int)$row['Member_ID'] : null,
+            'Username'  => $row['Username'],
+            'First_Name'=> $row['First_Name'] ?? '',
+            'Last_Name' => $row['Last_Name'] ?? '',
+            'Email'     => $row['Email'] ?? '',
+            'Phone'     => $row['Phone'] ?? null,
+            'Join_Date' => $row['Join_Date'] ?? null,
+            'Status'    => $row['STATUS'] ?? 'Inactive'
+        ];
     }
     $stmt->close();
 

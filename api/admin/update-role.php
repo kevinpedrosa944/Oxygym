@@ -3,7 +3,8 @@
 
 session_start();
 header('Content-Type: application/json');
-include('../../includes/db_connect.php');
+// Use absolute path for includes
+include_once __DIR__ . '/../../includes/db_connect.php';
 
 if (empty($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
     http_response_code(401);
