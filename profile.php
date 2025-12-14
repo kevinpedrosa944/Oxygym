@@ -120,7 +120,9 @@ $conn->close();
 <body>
     <header>
         <div class="container nav-container">
-            <h1 class="logo">LOGO OF OXYGYM</h1>
+            <a href="/Oxygym/profile.php" class="logo-link">
+                <h1 class="logo">LOGO OF OXYGYM</h1>
+            </a>
             <nav>
                 <ul>
                     <li><a href="/Oxygym/index.html#about-section">About</a></li>
@@ -129,7 +131,8 @@ $conn->close();
                 </ul>
             </nav>
             <div id="authButtons">
-                <a href="#" class="register-btn" onclick="handleLogout(event)">Logout</a>
+                 <a href="/Oxygym/profile.php" class="profile-btn">Profile</a>
+                <a href="#" class="logout-btn" onclick="handleLogout(event)">Logout</a>
             </div>
         </div>
     </header>
@@ -137,7 +140,7 @@ $conn->close();
         
         <!-- Profile Header -->
         <section class="profile-header">
-            <div class="profile-avatar">
+             <div class="profile-avatar">
                 <i class="fas fa-user"></i>
             </div>
             <div class="profile-info">
@@ -155,7 +158,7 @@ $conn->close();
         <?php endif; ?>
 
         <!-- Personal Information -->
-        <section class="info-section">
+         <section class="info-section two-column-layout">
             <h2><i class="fas fa-user-circle"></i> Personal Information</h2>
             <div class="details-grid">
                 <div class="detail-item">
@@ -166,12 +169,10 @@ $conn->close();
                     <span class="detail-label">Phone</span>
                     <span class="detail-value"><?= htmlspecialchars($member['Phone'] ?? 'Not provided') ?></span>
                 </div>
-
-                <div class="detail-item">
+                <div class="detail-item address-item">
                     <span class="detail-label">Address</span>
                     <span class="detail-value"><?= htmlspecialchars($member['Address'] ?? 'Not provided') ?></span>
                 </div>
-
                 <div class="detail-item">
                     <span class="detail-label">Gender</span>
                     <span class="detail-value"><?= htmlspecialchars($member['Gender'] ?? 'Not specified') ?></span>
@@ -190,6 +191,7 @@ $conn->close();
                 </div>
             </div>
         </section>
+
 
         <!-- Subscription Information -->
         <section class="info-section">
