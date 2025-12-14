@@ -112,10 +112,11 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <link rel="stylesheet" href="assets/css/styles.css">
     <title>My Profile - OxyGym</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="assets/css/profile.css">
+    <link rel="stylesheet" href="assets/css/profile-white.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
     <header>
@@ -158,14 +159,6 @@ $conn->close();
         <section class="info-section">
             <h2><i class="fas fa-user-circle"></i> Personal Information</h2>
             <div class="details-grid">
-                <div class="detail-item">
-                    <span class="detail-label">First Name</span>
-                    <span class="detail-value"><?= htmlspecialchars($member['First_Name'] ?? 'N/A') ?></span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Last Name</span>
-                    <span class="detail-value"><?= htmlspecialchars($member['Last_Name'] ?? 'N/A') ?></span>
-                </div>
                 <div class="detail-item">
                     <span class="detail-label">Email</span>
                     <span class="detail-value"><?= htmlspecialchars($member['Email'] ?? 'N/A') ?></span>

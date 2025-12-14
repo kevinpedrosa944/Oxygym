@@ -1,0 +1,31 @@
+/* Scoped styles for white theme on profile page */
+.profile-container .info-section {
+    background: #ffffff;
+    color: #1a1a2e;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.profile-container .info-section h2 {
+    color: #1a1a2e;
+    border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+
+.profile-container .info-section .detail-label {
+    color: #555;
+}
+
+.profile-container .info-section .detail-value {
+    color: #1a1a2e;
+}
+
+.profile-container .subscription-section {
+    background: #ffffff;
+}
+
+.profile-container .subscription-section h3 {
+    color: #1a1a2e;
+}
+
+.profile-container .subscription-stat .stat-label {
+    color: #555;
+}
