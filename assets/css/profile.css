@@ -5,9 +5,9 @@
     --primary-color: #ffcc00; /* gold-yellow */
     --secondary-color: #ffa500;
     --background-color: #1a1a2e; /* dark-navy */
-    --card-background: #1f1f38;
-    --text-color: #ffffff;
-    --muted-text-color: #a0a09e; /* light-gray-brown */
+    --card-background: #ffffff; /* CHANGED to white */
+    --text-color: #1a1a2e; /* CHANGED to dark-navy */
+    --muted-text-color: #555; /* CHANGED to a darker gray */
     --white-color: #fff;
     --danger-color: #e74c3c;
     --success-color: #2ecc71;
@@ -66,7 +66,7 @@ body {
 .profile-info p {
     margin: 0;
     opacity: 0.9;
-    color: var(--muted-text-color);
+    color: #a0a09e;
 }
 
 /* Info Section */
@@ -76,18 +76,18 @@ body {
     border-radius: var(--border-radius);
     margin-bottom: 2rem;
     box-shadow: var(--box-shadow);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .info-section h2 {
     font-size: 1.6rem;
     font-weight: 600;
     margin: 0 0 1.5rem 0;
-    color: var(--primary-color);
+    color: var(--text-color);
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     padding-bottom: 1rem;
 }
 
@@ -114,6 +114,7 @@ body {
 
 .detail-value {
     font-size: 1.1rem;
+    color: var(--text-color);
 }
 
 .price-tag {
@@ -124,10 +125,14 @@ body {
 
 /* Subscription Section */
 .subscription-section {
-    background: #1f1f38;
+    background: var(--card-background);
     padding: 2rem;
     border-radius: var(--border-radius);
     margin-bottom: 2rem;
+}
+
+.subscription-section h3{
+    color: var(--text-color);
 }
 
 .subscription-grid {
@@ -236,6 +241,10 @@ body {
 }
 
 .back-link a {
+    color: var(--primary-color);
+    font-.subscription-section h3{
+    color: var(--text-color);
+} a-link a {
     color: var(--primary-color);
     font-weight: 600;
     text-decoration: none;

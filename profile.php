@@ -58,15 +58,17 @@ if ($subStmt) {
     die('Database error: ' . $conn->error);
 }
 
-// Calculate days remaining - with null check
-$today = new DateTime();
-$endDate = new DateTime($member['End_Date']);
-$interval = $today->diff($endDate);
-if ($interval->invert) {
+// Calculate days remaining - CORRECTED
+$today = new DateTime(); // Today's date
+$endDate = new DateTime($member['End_Date']); // Subscription end date
+// Normalize to midnight to ensure accurate day difference
+$today->setTime(0, 0, 0);
+$endDate->setTime(0, 0, 0);
+if ($today > $endDate) {
     $daysRemaining = 0;
 } else {
-    // The format('%a') gives the total number of days, which is more reliable.
-    $daysRemaining = (int)$interval->format('%a');
+    $interval = $today->diff($endDate);
+    $daysRemaining = $interval->days;
 }
 
 // Calculate days since join - with null check
