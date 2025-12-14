@@ -330,7 +330,10 @@ $conn->close();
         .age-preview { margin-top: 0.5rem; font-weight: 600; font-size: 0.95rem; }
         .age-preview.ok { color: #16a34a; }      /* green for eligible */
         .age-preview.warn { color: #dc2626; }    /* red for underage/invalid */
-</style>
+
+        /* inline plan error */
+        .field-error { color: #dc2626; margin-top: 0.5rem; font-weight: 700; font-size: 0.95rem; }
+    </style>
 
 </head>
 <body>
@@ -368,9 +371,9 @@ $conn->close();
                 <!-- Plan Selection -->
                 <div class="form-group">
                     <label>Select Your Plan *</label>
-                    <div class="plan-options">
+                    <div class="plan-options" id="planOptions">
                         <label class="plan-option">
-                            <input type="radio" name="plan" value="Standard" required <?= (isset($plan) && $plan==='Standard') ? 'checked' : '' ?>>
+                            <input type="radio" name="plan" value="Standard" <?= (isset($plan) && $plan==='Standard') ? 'checked' : '' ?>>
                             <div class="plan-label">
                                 <h3>STANDARD</h3>
                                 <p>₱999/month</p>
@@ -378,7 +381,7 @@ $conn->close();
                         </label>
 
                         <label class="plan-option">
-                            <input type="radio" name="plan" value="Prime" required <?= (isset($plan) && $plan==='Prime') ? 'checked' : '' ?>>
+                            <input type="radio" name="plan" value="Prime" <?= (isset($plan) && $plan==='Prime') ? 'checked' : '' ?>>
                             <div class="plan-label">
                                 <h3>PRIME</h3>
                                 <p>₱1,499/month</p>
@@ -386,13 +389,14 @@ $conn->close();
                         </label>
 
                         <label class="plan-option">
-                            <input type="radio" name="plan" value="Premium" required <?= (isset($plan) && $plan==='Premium') ? 'checked' : '' ?>>
+                            <input type="radio" name="plan" value="Premium" <?= (isset($plan) && $plan==='Premium') ? 'checked' : '' ?>>
                             <div class="plan-label">
                                 <h3>PREMIUM</h3>
                                 <p>₱14,999/year</p>
                             </div>
                         </label>
                     </div>
+                    <div id="planError" class="field-error" role="alert" aria-live="assertive"></div>
                 </div>
 
                 <!-- Personal Details -->
@@ -460,6 +464,8 @@ $conn->close();
             const ageEl = document.getElementById('age');
             const previewEl = document.getElementById('agePreview');
             const MIN_AGE = 14;
+            const planErrorEl = document.getElementById('planError');
+            const form = document.querySelector('form');
 
             function calculateAge(birthdate) {
                 if (!birthdate) return '';
@@ -494,13 +500,49 @@ $conn->close();
                 }
             }
 
+            // show warning and scroll to plan options when no plan selected or server-side errors present
+            function scrollToPlansOnLoad() {
+                const planEl = document.getElementById('planOptions');
+                if (!planEl) return;
+                const hasErrors = !!document.querySelector('.error-messages');
+                const planChecked = !!document.querySelector('input[name="plan"]:checked');
+                if (hasErrors || !planChecked) {
+                    if (!planChecked) planErrorEl.textContent = 'Please choose a subscription plan';
+                    setTimeout(() => {
+                        planEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        try { planEl.focus({ preventScroll: true }); } catch (e) { planEl.focus(); }
+                    }, 80);
+                }
+            }
+
+            // validate on submit and show inline warning
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const planChecked = !!document.querySelector('input[name="plan"]:checked');
+                    if (!planChecked) {
+                        e.preventDefault();
+                        planErrorEl.textContent = 'Please choose a subscription plan';
+                        document.getElementById('planOptions').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        return false;
+                    }
+                });
+
+                // clear warning when user selects a plan
+                document.querySelectorAll('input[name="plan"]').forEach(function(r) {
+                    r.addEventListener('change', function() { planErrorEl.textContent = ''; });
+                });
+            }
+
             // update on both input and change for real-time feedback
             birthdayEl.addEventListener('input', updateAgeVisual);
             birthdayEl.addEventListener('change', updateAgeVisual);
 
             // initialize on load
-            document.addEventListener('DOMContentLoaded', updateAgeVisual);
-        })();
+            document.addEventListener('DOMContentLoaded', function() {
+                updateAgeVisual();
+                scrollToPlansOnLoad();
+            });
+         })();
     </script>
 </body>
 </html>
