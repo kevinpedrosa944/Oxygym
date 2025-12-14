@@ -112,169 +112,153 @@ $conn->close();
     <title>Subscribe - OxyGym</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        body {
-            background: #f3f4f6;
-        }
-
-        header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-            background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-
+   <style>
         .subs-container {
-            max-width: 900px;
-            margin: 7rem auto 3rem;
-            padding: 1.5rem;
+            max-width: 800px;
+            margin: 8rem auto 3rem;
+            padding: 2rem;
         }
-
         .form-section {
             background: white;
-            padding: 2.5rem;
+            padding: 2rem;
             border-radius: 1rem;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-        }
-
-        .form-section h2 {
-            font-size: 1.9rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .form-section p {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             margin-bottom: 2rem;
         }
-
-        /* Grid layout for inputs */
-        form {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.25rem;
+        .form-section h2 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
         }
-
-        /* Full-width sections */
-        .form-group,
-        .plan-options,
-        button {
-            grid-column: span 2;
+        .form-group {
+            margin-bottom: 1.5rem;
         }
-
         .form-group label {
-            font-weight: 600;
-            font-size: 0.9rem;
-            margin-bottom: 0.4rem;
             display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
         }
-
         .form-group input,
         .form-group select {
             width: 100%;
-            padding: 0.75rem 0.8rem;
-            border-radius: 0.5rem;
+            padding: 0.75rem;
             border: 1px solid #d1d5db;
-            font-size: 0.95rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
         }
-
-        .form-group input[readonly] {
-            background: #f9fafb;
-            color: #6b7280;
-            cursor: not-allowed;
-        }
-
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
         }
-
-        /* Plans */
         .plan-options {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
         }
-
         .plan-option {
             border: 2px solid #e5e7eb;
-            border-radius: 0.75rem;
-            padding: 1.2rem;
-            text-align: center;
+            border-radius: 0.5rem;
+            padding: 1rem;
             cursor: pointer;
-            transition: 0.25s ease;
+            transition: all 0.3s;
+            text-align: center;
         }
-
-        .plan-option:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
-        }
-
-        .plan-option input {
+        .plan-option input[type="radio"] {
             display: none;
         }
-
-        .plan-option input:checked + .plan-label {
-            background: #eff6ff;
-            border-radius: 0.5rem;
+        .plan-option input[type="radio"]:checked + .plan-label {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
         }
-
-        .plan-option:has(input:checked) {
-            border-color: #2563eb;
+        .plan-label {
+            cursor: pointer;
         }
-
         .plan-label h3 {
-            font-size: 1.1rem;
-            margin-bottom: 0.4rem;
+            color: #333;
+            margin-bottom: 0.5rem;
         }
-
         .plan-label p {
-            font-weight: 700;
-            color: #2563eb;
-            font-size: 1.15rem;
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2rem;
         }
-
         .btn-submit {
-            margin-top: 1rem;
-            padding: 0.85rem;
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
             font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
             font-weight: 600;
-            border-radius: 0.6rem;
-            background: #2563eb;
-            transition: background 0.2s ease;
         }
-
         .btn-submit:hover {
-            background: #1e40af;
+            background-color: #2563eb;
         }
-
         .back-link {
             text-align: center;
             margin-top: 2rem;
         }
-
         .back-link a {
+            color: #3b82f6;
+            text-decoration: none;
             font-weight: 500;
         }
-
-        /* Mobile */
-        @media (max-width: 768px) {
-            form {
-                grid-template-columns: 1fr;
-            }
-
-            .plan-options {
-                grid-template-columns: 1fr;
-            }
-
-            .form-group,
-            .plan-options,
-            button {
-                grid-column: span 1;
-            }
+        /* Subscription options as buttons */
+        .plan-option {
+            border: 2px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1.2rem 1rem;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.25s ease;
+            background: #fff;
         }
+
+        .plan-option:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+        }
+
+        .plan-option input[type="radio"] {
+            display: none;
+        }
+
+        /* Selected state = button pressed */
+        .plan-option input[type="radio"]:checked + .plan-label {
+            background-color: #eff6ff;
+            border-radius: 0.5rem;
+            padding: 0.6rem;
+        }
+
+        /* Stronger visual feedback when selected */
+        .plan-option:has(input[type="radio"]:checked) {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+        }
+
+        .plan-label {
+            cursor: pointer;
+            display: block;
+        }
+
+        .plan-label h3 {
+            margin-bottom: 0.4rem;
+        }
+
+        .plan-label p {
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+</style>
+
+
 </style>
 
 </head>
