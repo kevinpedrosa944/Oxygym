@@ -9,390 +9,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: #4b4a4a;
-        }
-
-        .admin-container {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        .sidebar {
-            width: 250px;
-            background: linear-gradient(135deg, #1a1a2e 0%, #3a3a40 100%);
-            color: white;
-            padding: 20px;
-            position: fixed;
-            height: 100vh;
-            left: 0;
-            top: 0;
-            overflow-y: auto;
-            z-index: 100;
-        }
-
-        .sidebar h2 {
-            color: #ffcc00;
-            margin-bottom: 20px;
-            font-size: 1.3rem;
-        }
-
-        .sidebar ul {
-            list-style: none;
-        }
-
-        .sidebar li {
-            margin-bottom: 15px;
-        }
-
-        .sidebar a {
-            color: white;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            border-radius: 6px;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-
-        .sidebar a:hover,
-        .sidebar a.active {
-            background: #ffcc00;
-            color: #1a1a2e;
-            font-weight: 600;
-        }
-
-        .main-content {
-            margin-left: 250px;
-            flex: 1;
-            padding: 30px;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .header h1 {
-            color: #1a1a2e;
-            font-size: 1.8rem;
-        }
-
-        .logout-btn {
-            background: #ef4444;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
-        }
-
-        .logout-btn:hover {
-            background: #dc2626;
-        }
-
-        .content-section {
-            display: none;
-        }
-
-        .content-section.active {
-            display: block;
-        }
-
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-
-        .card h3 {
-            color: #1a1a2e;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-        }
-
-        .search-container {
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .search-input {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            width: 300px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        table th {
-            background: #f0f0f0;
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-            color: #333;
-            border-bottom: 2px solid #ddd;
-            cursor: pointer;
-            position: relative;
-        }
-
-        table th:hover {
-            background: #e0e0e0;
-        }
-
-        table th.sort-asc::after {
-            content: ' ▲';
-            font-size: 0.8rem;
-        }
-
-        table th.sort-desc::after {
-            content: ' ▼';
-            font-size: 0.8rem;
-        }
-
-        table td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-        }
-
-        table tr:hover {
-            background: #f9f9f9;
-        }
-
-        .role-select {
-            padding: 6px 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            font-family: inherit;
-        }
-
-        .action-btn {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            margin-right: 5px;
-            transition: all 0.3s;
-            font-family: inherit;
-        }
-
-        .btn-edit {
-            background: #3b82f6;
-            color: white;
-        }
-
-        .btn-edit:hover {
-            background: #2563eb;
-        }
-
-        .btn-save {
-            background: #10b981;
-            color: white;
-        }
-
-        .btn-save:hover {
-            background: #059669;
-        }
-
-        .btn-delete {
-            background: #ef4444;
-            color: white;
-        }
-
-        .btn-delete:hover {
-            background: #dc2626;
-        }
-
-        .status-badge {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .status-active {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .status-inactive {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .status-admin {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .status-staff {
-            background: #dbeafe;
-            color: #0c2340;
-        }
-
-        .status-member {
-            background: #e0e7ff;
-            color: #312e81;
-        }
-
-        .success-message {
-            background: #d1fae5;
-            color: #065f46;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            display: none;
-            border-left: 4px solid #10b981;
-        }
-
-        .error-message {
-            background: #fee2e2;
-            color: #991b1b;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            display: none;
-            border-left: 4px solid #ef4444;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            text-align: center;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-        }
-
-        .stat-card .number {
-            font-size: 3rem;
-            font-weight: bold;
-            color: #fac905;
-            margin-bottom: 15px;
-        }
-
-        .stat-card .label {
-            color: #ffffff;
-            font-size: 1rem;
-            font-weight: 500;
-        }
-
-        .chart-container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 70px;
-            }
-
-            .sidebar a span {
-                display: none;
-            }
-
-            .main-content {
-                margin-left: 70px;
-            }
-
-            .search-input {
-                width: 200px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="assets/css/admin.css">
 </head>
 <body>
     <div class="admin-container">
-        <!-- Sidebar Navigation -->
+        <!-- Sidebar -->
         <div class="sidebar">
             <h2>🏋️ Admin</h2>
             <ul>
-                <li>
-                    <a class="nav-link active" data-section="dashboard">
-                        <i class="fas fa-chart-line"></i>
-                        <span>Dashboard</span>
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link" data-section="users">
-                        <i class="fas fa-users"></i>
-                        <span>Users & Roles</span>
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link" data-section="members">
-                        <i class="fas fa-user-friends"></i>
-                        <span>Members</span>
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link" data-section="subscriptions">
-                        <i class="fas fa-credit-card"></i>
-                        <span>Subscriptions</span>
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link" data-section="reviews">
-                        <i class="fas fa-star"></i>
-                        <span>Reviews</span>
-                    </a>
-                </li>
-                <li style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
-                    <a href="/Oxygym/logout.php">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Logout</span>
-                    </a>
-                </li>
+                <li><a class="nav-link active" data-section="dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a></li>
+                <li><a class="nav-link" data-section="users"><i class="fas fa-users"></i><span>Users & Roles</span></a></li>
+                <li><a class="nav-link" data-section="members"><i class="fas fa-user-friends"></i><span>Members</span></a></li>
+                <li><a class="nav-link" data-section="subscriptions"><i class="fas fa-credit-card"></i><span>Subscriptions</span></a></li>
+                <li><a class="nav-link" data-section="reviews"><i class="fas fa-star"></i><span>Reviews</span></a></li>
+                <li style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;"><a href="/Oxygym/logout.php"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></li>
             </ul>
         </div>
 
@@ -400,183 +30,102 @@
         <div class="main-content">
             <div class="header">
                 <h1 id="pageTitle">Dashboard</h1>
-                <a href="/Oxygym/logout.php" class="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
+                <a href="/Oxygym/logout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
 
-            <!-- Dashboard Section -->
             <div id="dashboard" class="content-section active">
                 <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="number" id="totalUsers">0</div>
-                        <div class="label">Total Users</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="number" id="totalMembers">0</div>
-                        <div class="label">Total Members</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="number" id="activeSubscriptions">0</div>
-                        <div class="label">Active Subscriptions</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="number" id="totalReviews">0</div>
-                        <div class="label">Total Reviews</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="number" id="totalRevenue">₱0</div>
-                        <div class="label">Total Revenue</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="number" id="resubscriptions">0</div>
-                        <div class="label">Resubscriptions</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="number" id="newUsers">0</div>
-                        <div class="label">New Users</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="number" id="newSubscribers">0</div>
-                        <div class="label">New Subscribers</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="number" id="availableCoaches">0</div>
-                        <div class="label">Available Coaches</div>
-                    </div>
-                </div>
-                <div class="chart-container">
-                    <h3>📈 Subscription Trends</h3>
-                    <canvas id="subscriptionChart"></canvas>
+                    <div class="stat-card"><div class="number" id="totalUsers">0</div><div class="label">Total Users</div></div>
+                    <div class="stat-card"><div class="number" id="totalMembers">0</div><div class="label">Total Members</div></div>
+                    <div class="stat-card"><div class="number" id="activeSubscriptions">0</div><div class="label">Active Subscriptions</div></div>
+                    <div class="stat-card"><div class="number" id="totalReviews">0</div><div class="label">Total Reviews</div></div>
                 </div>
             </div>
 
-            <!-- Users Section -->
             <div id="users" class="content-section">
                 <div class="card">
-                    <div id="successMessage" class="success-message"></div>
-                    <div id="errorMessage" class="error-message"></div>
-
+                    <div id="successMessage" class="success-message"></div><div id="errorMessage" class="error-message"></div>
                     <h3>👥 Manage Users & Assign Roles</h3>
-                    <div class="search-container">
-                        <input type="text" id="search-users" class="search-input" placeholder="Search users...">
-                    </div>
-                    <table id="usersTable">
-                        <thead>
-                            <tr>
-                                <th data-sort="User_ID">User ID</th>
-                                <th data-sort="Username">Username</th>
-                                <th data-sort="Role">Current Role</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="4" style="text-align: center; color: #999;">Loading...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <table><thead><tr><th>User ID</th><th>Username</th><th>Current Role</th><th>Change Role</th><th>Action</th></tr></thead><tbody id="usersTable"></tbody></table>
                 </div>
             </div>
 
-            <!-- Members Section -->
             <div id="members" class="content-section">
                 <div class="card">
-                    <h3>👥 Members</h3>
-                    <div class="search-container">
-                        <input type="text" id="search-members" class="search-input" placeholder="Search members...">
-                    </div>
-                    <table id="membersTable">
-                        <thead>
-                            <tr>
-                                <th data-sort="Member_ID">Member ID</th>
-                                <th data-sort="First_Name">Name</th>
-                                <th data-sort="Email">Email</th>
-                                <th data-sort="Phone">Phone</th>
-                                <th data-sort="Join_Date">Join Date</th>
-                                <th data-sort="Status">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="6" style="text-align: center; color: #999;">Loading...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <h3>Members</h3>
+                    <input type="text" id="memberSearch" placeholder="Search members..." style="margin-bottom: 20px; width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+                    <table><thead><tr><th>Member ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Join Date</th><th>Status</th></tr></thead><tbody id="membersTable"></tbody></table>
                 </div>
             </div>
 
-            <!-- Subscriptions Section -->
             <div id="subscriptions" class="content-section">
                 <div class="card">
                     <h3>💳 Subscriptions</h3>
-                    <div class="search-container">
-                        <input type="text" id="search-subscriptions" class="search-input" placeholder="Search subscriptions...">
-                    </div>
-                    <table id="subscriptionsTable">
-                        <thead>
-                            <tr>
-                                <th data-sort="member_name">Member</th>
-                                <th data-sort="Plan_Name">Plan</th>
-                                <th data-sort="Price">Price</th>
-                                <th data-sort="Start_Date">Start Date</th>
-                                <th data-sort="End_Date">End Date</th>
-                                <th data-sort="Status">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="6" style="text-align: center; color: #999;">Loading...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <table><thead><tr><th>Member</th><th>Plan</th><th>Price</th><th>Start Date</th><th>End Date</th><th>Status</th></tr></thead><tbody id="subscriptionsTable"></tbody></table>
                 </div>
             </div>
-
-            <!-- Reviews Section -->
+            
             <div id="reviews" class="content-section">
                 <div class="card">
                     <h3>⭐ Member Reviews</h3>
-                    <div class="search-container">
-                        <input type="text" id="search-reviews" class="search-input" placeholder="Search reviews...">
-                    </div>
-                    <table id="reviewsTable">
-                        <thead>
-                            <tr>
-                                <th data-sort="Review_ID">Review ID</th>
-                                <th data-sort="member_name">Member</th>
-                                <th data-sort="Rating">Rating</th>
-                                <th data-sort="Title">Title</th>
-                                <th data-sort="Created_At">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="5" style="text-align: center; color: #999;">Loading...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <table><thead><tr><th>Review ID</th><th>Member</th><th>Rating</th><th>Title</th><th>Date</th></tr></thead><tbody id="reviewsTable"></tbody></table>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        let currentData = {
-            users: [],
-            members: [],
-            subscriptions: [],
-            reviews: []
-        };
+    <!-- Member Details Modal -->
+    <div id="member-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                 <h3 id="modal-title">Member Details</h3>
+                 <span class="close-button">&times;</span>
+            </div>
+            <div id="modal-body">
+                <!-- Content generated by JS -->
+            </div>
+        </div>
+    </div>
 
-        // Navigation
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const section = link.getAttribute('data-section');
-                switchSection(section);
-            });
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const isAdmin = await checkAdminAuth();
+            if (isAdmin) {
+                loadDashboard();
+                setupNavigation();
+                setupModal();
+            }
         });
+
+        function setupNavigation() {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const section = link.getAttribute('data-section');
+                    switchSection(section);
+                });
+            });
+        }
+        
+        function setupModal() {
+            const modal = document.getElementById('member-modal');
+            const closeButton = document.querySelector('.close-button');
+            const membersTable = document.getElementById('membersTable');
+
+            membersTable.addEventListener('click', function(e) {
+                const row = e.target.closest('tr[data-member-id]');
+                if (row) {
+                    openMemberModal(row.dataset.memberId);
+                }
+            });
+
+            closeButton.onclick = () => modal.style.display = 'none';
+            window.onclick = (event) => {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            };
+        }
 
         function switchSection(sectionId) {
             document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
@@ -586,26 +135,23 @@
             document.querySelector(`[data-section="${sectionId}"]`).classList.add('active');
 
             const titles = {
-                dashboard: '📊 Dashboard',
-                users: '👥 Users & Roles',
-                members: '👥 Members',
-                subscriptions: '💳 Subscriptions',
-                reviews: '⭐ Reviews'
+                dashboard: '📊 Dashboard', users: '👥 Users & Roles',
+                members: '👥 Members', subscriptions: '💳 Subscriptions', reviews: '⭐ Reviews'
             };
             document.getElementById('pageTitle').textContent = titles[sectionId];
-
-            if (sectionId === 'users') loadUsers();
-            else if (sectionId === 'members');
-            else if (sectionId === 'subscriptions') loadSubscriptions();
-            else if (sectionId === 'reviews') loadReviews();
-            else if (sectionId === 'dashboard') loadDashboard();
+            
+            const loadFunctions = {
+                users: loadUsers, members: loadMembers,
+                subscriptions: loadSubscriptions, reviews: loadReviews,
+                dashboard: loadDashboard
+            };
+            if(loadFunctions[sectionId]) loadFunctions[sectionId]();
         }
 
         async function checkAdminAuth() {
             try {
                 const response = await fetch('/Oxygym/api/check_session.php');
                 const data = await response.json();
-
                 if (!data.authenticated || data.role !== 'Admin') {
                     window.location.href = '/Oxygym/Login.html';
                     return false;
@@ -622,24 +168,19 @@
             try {
                 const response = await fetch('/Oxygym/api/admin/dashboard.php');
                 const data = await response.json();
-
-                document.getElementById('totalUsers').textContent = data.totalUsers || 0;
-                document.getElementById('totalMembers').textContent = data.totalMembers || 0;
-                document.getElementById('activeSubscriptions').textContent = data.activeSubscriptions || 0;
-                document.getElementById('totalReviews').textContent = data.totalReviews || 0;
-            } catch (error) {
-                console.error('Dashboard load error:', error);
-            }
+                document.getElementById('totalUsers').textContent = data.totalUsers || '0';
+                document.getElementById('totalMembers').textContent = data.totalMembers || '0';
+                document.getElementById('activeSubscriptions').textContent = data.activeSubscriptions || '0';
+                document.getElementById('totalReviews').textContent = data.totalReviews || '0';
+            } catch (error) { console.error('Dashboard load error:', error); }
         }
 
         async function loadUsers() {
             try {
                 const response = await fetch('/Oxygym/api/admin/users.php');
                 const data = await response.json();
-
                 const tbody = document.getElementById('usersTable');
                 tbody.innerHTML = '';
-
                 if (data.users && data.users.length > 0) {
                     data.users.forEach(user => {
                         tbody.innerHTML += `
@@ -654,83 +195,132 @@
                                         <option value="Admin" ${user.Role === 'Admin' ? 'selected' : ''}>Admin</option>
                                     </select>
                                 </td>
-                                <td>
-                                    <button class="action-btn btn-save" onclick="updateUserRole(${user.User_ID})">Update</button>
-                                </td>
-                            </tr>
-                        `;
+                                <td><button class="action-btn btn-save" onclick="updateUserRole(${user.User_ID})">Update</button></td>
+                            </tr>`;
                     });
                 } else {
                     tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">No users found</td></tr>';
                 }
-            } catch (error) {
-                console.error('Users load error:', error);
-            }
+            } catch (error) { console.error('Users load error:', error); }
         }
 
         async function updateUserRole(userId) {
-            const roleSelect = document.getElementById(`role-${userId}`);
-            const newRole = roleSelect.value;
-
+            const newRole = document.getElementById(`role-${userId}`).value;
             try {
                 const response = await fetch('/Oxygym/api/admin/update-role.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id: userId, role: newRole })
                 });
-
                 const data = await response.json();
-
                 if (data.success) {
-                    showSuccessMessage('✅ Role updated successfully');
+                    showFeedback('✅ Role updated successfully', 'success');
                     loadUsers();
                 } else {
-                    showErrorMessage('❌ ' + (data.error || 'Failed to update role'));
+                    showFeedback('❌ ' + (data.error || 'Failed to update role'), 'error');
                 }
             } catch (error) {
                 console.error('Update role error:', error);
-                showErrorMessage('❌ Error updating role');
+                showFeedback('❌ Error updating role', 'error');
             }
         }
 
         async function loadMembers() {
+            const tbody = document.getElementById('membersTable');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">Loading...</td></tr>';
             try {
                 const response = await fetch('/Oxygym/api/admin/members.php');
                 const data = await response.json();
-
-                const tbody = document.getElementById('membersTable');
                 tbody.innerHTML = '';
-
                 if (data.members && data.members.length > 0) {
                     data.members.forEach(member => {
                         tbody.innerHTML += `
-                            <tr>
+                            <tr data-member-id="${member.Member_ID}">
                                 <td>${member.Member_ID}</td>
                                 <td>${member.First_Name} ${member.Last_Name}</td>
                                 <td>${member.Email}</td>
                                 <td>${member.Phone || 'N/A'}</td>
                                 <td>${member.Join_Date}</td>
                                 <td><span class="status-badge status-${member.Status.toLowerCase()}">${member.Status}</span></td>
-                            </tr>
-                        `;
+                            </tr>`;
                     });
                 } else {
                     tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">No members found</td></tr>';
                 }
-            } catch (error) {
+            } catch (error) { 
                 console.error('Members load error:', error);
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Failed to load members</td></tr>';
             }
         }
+        
+        async function openMemberModal(memberId) {
+            const modal = document.getElementById('member-modal');
+            const modalBody = document.getElementById('modal-body');
+            const modalTitle = document.getElementById('modal-title');
+            
+            modalBody.innerHTML = '<p style="text-align:center; padding: 40px;">Loading details...</p>';
+            modal.style.display = 'block';
 
-        async function loadSubscriptions() {
             try {
+                const [detailsRes, transRes] = await Promise.all([
+                    fetch(`/Oxygym/api/admin/get_member_details.php?member_id=${memberId}`),
+                    fetch(`/Oxygym/api/admin/get_member_transactions.php?member_id=${memberId}`)
+                ]);
+
+                if (!detailsRes.ok) throw new Error(`Failed to fetch member details: ${detailsRes.status}`);
+                
+                const memberDetails = await detailsRes.json();
+                const transactions = transRes.ok ? await transRes.json() : [];
+
+                const firstName = memberDetails?.First_Name || '';
+                const lastName = memberDetails?.Last_Name || '';
+                
+                modalTitle.textContent = `Details for ${firstName} ${lastName}`.trim();
+
+                let detailsHtml = `
+                    <div class="member-details-column">
+                        <h4>Personal Information</h4>
+                        <p><strong>Email:</strong> ${memberDetails?.Email || 'N/A'}</p>
+                        <p><strong>Phone:</strong> ${memberDetails?.Phone || 'N/A'}</p>
+                        <p><strong>Address:</strong> ${memberDetails?.Address || 'N/A'}</p>
+                        <p><strong>Join Date:</strong> ${memberDetails?.Join_Date || 'N/A'}</p>
+                    </div>`;
+
+                let transactionsHtml = '<div class="transaction-history-column">';
+                transactionsHtml += '<h4>Transaction History</h4>';
+                
+                if (Array.isArray(transactions) && transactions.length > 0) {
+                    transactionsHtml += '<table><thead><tr><th>Date</th><th>Amount</th><th>Plan</th><th>Status</th></tr></thead><tbody>';
+                    transactions.forEach(t => {
+                        transactionsHtml += `
+                            <tr>
+                                <td>${t.Transaction_Date || 'N/A'}</td>
+                                <td>₱${t.Amount ? parseFloat(t.Amount).toFixed(2) : '0.00'}</td>
+                                <td>${t.Membership_Name || 'N/A'}</td>
+                                <td><span class="status-badge status-${(t.Status || 'inactive').toLowerCase()}">${t.Status || 'N/A'}</span></td>
+                            </tr>`;
+                    });
+                    transactionsHtml += '</tbody></table>';
+                } else {
+                    transactionsHtml += '<p>No transactions found for this member.</p>';
+                }
+                transactionsHtml += '</div>';
+
+                modalBody.innerHTML = detailsHtml + transactionsHtml;
+
+            } catch(error) {
+                console.error("Error opening member modal:", error);
+                modalBody.innerHTML = `<p style="text-align:center; padding: 40px; color: red;">Could not load member details. ${error.message}</p>`;
+            }
+        }
+        
+        async function loadSubscriptions() {
+             try {
                 const response = await fetch('/Oxygym/api/admin/subscriptions.php');
                 const data = await response.json();
-
                 const tbody = document.getElementById('subscriptionsTable');
                 tbody.innerHTML = '';
-
-                if (data.subscriptions && data.subscriptions.length > 0) {
+                 if (data.subscriptions && data.subscriptions.length > 0) {
                     data.subscriptions.forEach(sub => {
                         tbody.innerHTML += `
                             <tr>
@@ -740,74 +330,42 @@
                                 <td>${sub.Start_Date}</td>
                                 <td>${sub.End_Date}</td>
                                 <td><span class="status-badge status-${sub.Status.toLowerCase()}">${sub.Status}</span></td>
-                            </tr>
-                        `;
+                            </tr>`;
                     });
                 } else {
                     tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">No subscriptions found</td></tr>';
                 }
-            } catch (error) {
-                console.error('Subscriptions load error:', error);
-            }
+            } catch (error) { console.error('Subscriptions load error:', error); }
         }
-
         async function loadReviews() {
-            const tbody = document.getElementById('reviewsTable');
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">Loading...</td></tr>';
             try {
-                const response = await fetch('/Oxygym/api/admin/reviews.php', { credentials: 'same-origin' });
-                if (!response.ok) {
-                    // API returned an error (401/403/500 etc.)
-                    console.error('Failed to fetch reviews, status:', response.status);
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">Unable to load reviews (server error).</td></tr>';
-                    return;
-                }
-
+                const response = await fetch('/Oxygym/api/admin/reviews.php');
                 const data = await response.json();
+                const tbody = document.getElementById('reviewsTable');
                 tbody.innerHTML = '';
-
-                if (data && Array.isArray(data.reviews) && data.reviews.length > 0) {
+                if (data.reviews && data.reviews.length > 0) {
                     data.reviews.forEach(review => {
-                        const stars = (review.Rating && Number(review.Rating) > 0) ? '⭐'.repeat(Number(review.Rating)) : '';
                         tbody.innerHTML += `
                             <tr>
                                 <td>${review.Review_ID}</td>
-                                <td>${(review.member_name || 'Unknown')}</td>
-                                <td>${stars}</td>
-                                <td>${(review.Title || '')}</td>
-                                <td>${(review.Created_At || '')}</td>
-                            </tr>
-                        `;
+                                <td>${review.First_Name} ${review.Last_Name}</td>
+                                <td>${'⭐'.repeat(review.Rating)}</td>
+                                <td>${review.Title}</td>
+                                <td>${review.Created_At}</td>
+                            </tr>`;
                     });
                 } else {
                     tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">No reviews found</td></tr>';
                 }
-            } catch (error) {
-                console.error('Reviews load error:', error);
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">Unable to load reviews (network error).</td></tr>';
-            }
+            } catch (error) { console.error('Reviews load error:', error); }
         }
 
-        function showSuccessMessage(message) {
-            const msg = document.getElementById('successMessage');
-            msg.textContent = message;
-            msg.style.display = 'block';
-            setTimeout(() => msg.style.display = 'none', 3000);
+        function showFeedback(message, type = 'success') {
+            const msgDiv = document.getElementById(type === 'success' ? 'successMessage' : 'errorMessage');
+            msgDiv.textContent = message;
+            msgDiv.style.display = 'block';
+            setTimeout(() => msgDiv.style.display = 'none', 3500);
         }
-
-        function showErrorMessage(message) {
-            const msg = document.getElementById('errorMessage');
-            msg.textContent = message;
-            msg.style.display = 'block';
-            setTimeout(() => msg.style.display = 'none', 3000);
-        }
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            const isAdmin = await checkAdminAuth();
-            if (isAdmin) {
-                loadDashboard();
-            }
-        });
     </script>
 </body>
 </html>
