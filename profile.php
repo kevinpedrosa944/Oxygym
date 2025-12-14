@@ -242,7 +242,7 @@ $conn->close();
                     <span class="detail-label">Duration</span>
                     <span class="detail-value"><?= $durationValue ?></span>
                 </div>
-                <div class="detail-item">
+                <.detail-item">
                     <span class="detail-label">Start Date</span>
                     <span class="detail-value"><?= $subscriptionStart ?></span>
                 </div>
@@ -260,15 +260,15 @@ $conn->close();
         <!-- User Reviews Section -->
         <section class="info-section">
             <h2><i class="fas fa-star"></i> My Reviews</h2>
-            <?php if (empty($reviews)): ?>
+            <?php if (empty($reviews)):
                 <p>You haven't left any reviews yet.</p>
             <?php else: ?>
                 <div class="reviews-grid">
-                    <?php foreach ($reviews as $review): ?>
+                    <?php foreach ($reviews as $review):
                         <div class="review-card">
                             <div class="review-header">
                                 <div class="review-rating">
-                                    <?php for ($i = 0; $i < 5; $i++): ?>
+                                    <?php for ($i = 0; $i < 5; $i++):
                                         <i class="fas fa-star <?= $i < $review['Rating'] ? 'rated' : '' ?>"></i>
                                     <?php endfor; ?>
                                 </div>
