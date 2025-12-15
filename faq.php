@@ -59,7 +59,7 @@
                 </ul>
             </nav>
             <div id="authButtons">
-                <a href="Login.html" class="register-btn">Sign Up</a>
+                <a href="Login.html" class="register-btn">Log out</a>
             </div>
         </div>
     </header>
