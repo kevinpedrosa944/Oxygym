@@ -6,7 +6,7 @@
 
         body {
             font-family: 'Poppins', sans-serif;
-            background: #4b4a4a;
+            background: #faf7f7;
         }
 
         .admin-container {
@@ -148,7 +148,7 @@
             padding: 12px;
             text-align: left;
             font-weight: 600;
-            color: #333;
+            color: #f8f6f6;
             border-bottom: 2px solid #ddd;
             cursor: pointer;
             position: relative;
@@ -283,20 +283,16 @@
         }
 
         .stat-card {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgb(255, 255, 255);
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            text-align: center;
+            box-shadow: 0 8px 32px rgb(151, 139, 139);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgb(248, 247, 247);
             transition: transform 0.3s ease;
+        
         }
 
-        .stat-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-        }
 
         .stat-card .number {
             font-size: 3rem;
@@ -305,16 +301,26 @@
             margin-bottom: 15px;
         }
 
-        .stat-card .label {
-            color: #ffffff;
-            font-size: 1rem;
-            font-weight: 500;
+        .stat-item {
+            background: rgb(255, 255, 255);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #ffcc00; /* Changed outline to a golden border */
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            transition: transform 0.3s ease, border-color 0.3s ease;    
+
         }
 
-        .combined-stat {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+        .stat-item:hover {
+            transform: translateY(-5px);
+            border-color: #fac905; /* Slightly different shade on hover */
+        }
+        .stat-item .label {
+            color: #ffffff;
+            font-size: 0.9rem;
+            font-weight: 500;   
+        
         }
 
         .combined-stat .stat-item {
