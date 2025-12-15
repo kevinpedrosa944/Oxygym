@@ -547,6 +547,15 @@
             reviews: []
         };
 
+        // debounce helper
+        function debounce(fn, delay = 250) {
+            let t;
+            return (...args) => {
+                clearTimeout(t);
+                t = setTimeout(() => fn(...args), delay);
+            };
+        }
+
         // Navigation
         document.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', (e) => {
@@ -573,7 +582,7 @@
             document.getElementById('pageTitle').textContent = titles[sectionId];
 
             if (sectionId === 'users') loadUsers();
-            else if (sectionId === 'members');
+            else if (sectionId === 'members') loadMembers();
             else if (sectionId === 'subscriptions') loadSubscriptions();
             else if (sectionId === 'reviews') loadReviews();
             else if (sectionId === 'dashboard') loadDashboard();
@@ -610,39 +619,136 @@
             }
         }
 
+        // Render functions (filter and display from currentData)
+        function renderUsers(filter = '') {
+            const tbody = document.querySelector('#usersTable tbody');
+            if (!tbody) return;
+            const q = (filter || '').trim().toLowerCase();
+            const list = currentData.users.filter(u => {
+                if (!q) return true;
+                return [String(u.User_ID), u.Username || '', u.Role || ''].some(f => String(f).toLowerCase().includes(q));
+            });
+            tbody.innerHTML = '';
+            if (list.length) {
+                list.forEach(user => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${user.User_ID}</td>
+                            <td>${user.Username}</td>
+                            <td><span class="status-badge status-${(user.Role || '').toLowerCase()}">${user.Role}</span></td>
+                            <td>
+                                <select class="role-select" id="role-${user.User_ID}">
+                                    <option value="Member" ${user.Role === 'Member' ? 'selected' : ''}>Member</option>
+                                    <option value="Staff" ${user.Role === 'Staff' ? 'selected' : ''}>Staff</option>
+                                    <option value="Admin" ${user.Role === 'Admin' ? 'selected' : ''}>Admin</option>
+                                </select>
+                            </td>
+                            <td>
+                                <button class="action-btn btn-save" onclick="updateUserRole(${user.User_ID})">Update</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">No users found</td></tr>';
+            }
+        }
+
+        function renderMembers(filter = '') {
+            const tbody = document.querySelector('#membersTable tbody');
+            if (!tbody) return;
+            const q = (filter || '').trim().toLowerCase();
+            const list = currentData.members.filter(m => {
+                if (!q) return true;
+                return [String(m.Member_ID), m.First_Name || '', m.Last_Name || '', m.Email || '', m.Phone || '', m.Status || '']
+                    .some(f => String(f).toLowerCase().includes(q));
+            });
+            tbody.innerHTML = '';
+            if (list.length) {
+                list.forEach(member => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${member.Member_ID}</td>
+                            <td>${member.First_Name} ${member.Last_Name}</td>
+                            <td>${member.Email}</td>
+                            <td>${member.Phone || 'N/A'}</td>
+                            <td>${member.Join_Date || ''}</td>
+                            <td><span class="status-badge status-${(member.Status || '').toLowerCase()}">${member.Status}</span></td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">No members found</td></tr>';
+            }
+        }
+
+        function renderSubscriptions(filter = '') {
+            const tbody = document.querySelector('#subscriptionsTable tbody');
+            if (!tbody) return;
+            const q = (filter || '').trim().toLowerCase();
+            const list = currentData.subscriptions.filter(s => {
+                if (!q) return true;
+                return [s.member_name || '', s.Plan_Name || '', String(s.Price || ''), s.Start_Date || '', s.End_Date || '', s.Status || '']
+                    .some(f => String(f).toLowerCase().includes(q));
+            });
+            tbody.innerHTML = '';
+            if (list.length) {
+                list.forEach(sub => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${sub.member_name}</td>
+                            <td>${sub.Plan_Name}</td>
+                            <td>₱${parseFloat(sub.Price || 0).toFixed(2)}</td>
+                            <td>${sub.Start_Date || ''}</td>
+                            <td>${sub.End_Date || ''}</td>
+                            <td><span class="status-badge status-${(sub.Status || '').toLowerCase()}">${sub.Status}</span></td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">No subscriptions found</td></tr>';
+            }
+        }
+
+        function renderReviews(filter = '') {
+            const tbody = document.querySelector('#reviewsTable tbody');
+            if (!tbody) return;
+            const q = (filter || '').trim().toLowerCase();
+            const list = currentData.reviews.filter(r => {
+                if (!q) return true;
+                return [String(r.Review_ID), r.member_name || '', String(r.Rating || ''), r.Title || '', r.Created_At || '']
+                    .some(f => String(f).toLowerCase().includes(q));
+            });
+            tbody.innerHTML = '';
+            if (list.length) {
+                list.forEach(review => {
+                    const stars = (review.Rating && Number(review.Rating) > 0) ? '⭐'.repeat(Number(review.Rating)) : '';
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${review.Review_ID}</td>
+                            <td>${(review.member_name || 'Unknown')}</td>
+                            <td>${stars}</td>
+                            <td>${(review.Title || '')}</td>
+                            <td>${(review.Created_At || '')}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">No reviews found</td></tr>';
+            }
+        }
+
         async function loadUsers() {
+            const tbody = document.querySelector('#usersTable tbody');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">Loading...</td></tr>';
             try {
                 const response = await fetch('/Oxygym/api/admin/users.php');
                 const data = await response.json();
-
-                const tbody = document.getElementById('usersTable');
-                tbody.innerHTML = '';
-
-                if (data.users && data.users.length > 0) {
-                    data.users.forEach(user => {
-                        tbody.innerHTML += `
-                            <tr>
-                                <td>${user.User_ID}</td>
-                                <td>${user.Username}</td>
-                                <td><span class="status-badge status-${user.Role.toLowerCase()}">${user.Role}</span></td>
-                                <td>
-                                    <select class="role-select" id="role-${user.User_ID}">
-                                        <option value="Member" ${user.Role === 'Member' ? 'selected' : ''}>Member</option>
-                                        <option value="Staff" ${user.Role === 'Staff' ? 'selected' : ''}>Staff</option>
-                                        <option value="Admin" ${user.Role === 'Admin' ? 'selected' : ''}>Admin</option>
-                                    </select>
-                                </td>
-                                <td>
-                                    <button class="action-btn btn-save" onclick="updateUserRole(${user.User_ID})">Update</button>
-                                </td>
-                            </tr>
-                        `;
-                    });
-                } else {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">No users found</td></tr>';
-                }
+                currentData.users = data.users || [];
+                renderUsers(document.getElementById('search-users')?.value || '');
             } catch (error) {
                 console.error('Users load error:', error);
+                if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">Unable to load users.</td></tr>';
             }
         }
 
@@ -672,99 +778,50 @@
         }
 
         async function loadMembers() {
-
+            const tbody = document.querySelector('#membersTable tbody');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">Loading...</td></tr>';
             try {
                 const response = await fetch('/Oxygym/api/admin/members.php');
                 const data = await response.json();
-
-                const tbody = document.getElementById('membersTable');
-                tbody.innerHTML = '';
-
-                if (data.members && data.members.length > 0) {
-                    data.members.forEach(member => {
-                        tbody.innerHTML += `
-                            <tr>
-                                <td>${member.Member_ID}</td>
-                                <td>${member.First_Name} ${member.Last_Name}</td>
-                                <td>${member.Email}</td>
-                                <td>${member.Phone || 'N/A'}</td>
-                                <td>${member.Join_Date}</td>
-                                <td><span class="status-badge status-${member.Status.toLowerCase()}">${member.Status}</span></td>
-                            </tr>
-                        `;
-                    });
-                } else {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">No members found</td></tr>';
-                }
+                currentData.members = data.members || [];
+                renderMembers(document.getElementById('search-members')?.value || '');
             } catch (error) {
                 console.error('Members load error:', error);
-
+                if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">Unable to load members.</td></tr>';
             }
         }
 
         async function loadSubscriptions() {
+            const tbody = document.querySelector('#subscriptionsTable tbody');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">Loading...</td></tr>';
             try {
                 const response = await fetch('/Oxygym/api/admin/subscriptions.php');
                 const data = await response.json();
-
-                const tbody = document.getElementById('subscriptionsTable');
-                tbody.innerHTML = '';
-
-                if (data.subscriptions && data.subscriptions.length > 0) {
-                    data.subscriptions.forEach(sub => {
-                        tbody.innerHTML += `
-                            <tr>
-                                <td>${sub.member_name}</td>
-                                <td>${sub.Plan_Name}</td>
-                                <td>₱${parseFloat(sub.Price).toFixed(2)}</td>
-                                <td>${sub.Start_Date}</td>
-                                <td>${sub.End_Date}</td>
-                                <td><span class="status-badge status-${sub.Status.toLowerCase()}">${sub.Status}</span></td>
-                            </tr>
-                        `;
-                    });
-                } else {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">No subscriptions found</td></tr>';
-                }
+                currentData.subscriptions = data.subscriptions || [];
+                renderSubscriptions(document.getElementById('search-subscriptions')?.value || '');
             } catch (error) {
                 console.error('Subscriptions load error:', error);
+                if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">Unable to load subscriptions.</td></tr>';
             }
         }
 
         async function loadReviews() {
-            const tbody = document.getElementById('reviewsTable');
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">Loading...</td></tr>';
+            const tbody = document.querySelector('#reviewsTable tbody');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">Loading...</td></tr>';
             try {
                 const response = await fetch('/Oxygym/api/admin/reviews.php', { credentials: 'same-origin' });
                 if (!response.ok) {
-                    // API returned an error (401/403/500 etc.)
                     console.error('Failed to fetch reviews, status:', response.status);
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">Unable to load reviews (server error).</td></tr>';
+                    if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">Unable to load reviews (server error).</td></tr>';
                     return;
                 }
 
                 const data = await response.json();
-                tbody.innerHTML = '';
-
-                if (data && Array.isArray(data.reviews) && data.reviews.length > 0) {
-                    data.reviews.forEach(review => {
-                        const stars = (review.Rating && Number(review.Rating) > 0) ? '⭐'.repeat(Number(review.Rating)) : '';
-                        tbody.innerHTML += `
-                            <tr>
-                                <td>${review.Review_ID}</td>
-                                <td>${(review.member_name || 'Unknown')}</td>
-                                <td>${stars}</td>
-                                <td>${(review.Title || '')}</td>
-                                <td>${(review.Created_At || '')}</td>
-                            </tr>
-                        `;
-                    });
-                } else {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">No reviews found</td></tr>';
-                }
+                currentData.reviews = data.reviews || [];
+                renderReviews(document.getElementById('search-reviews')?.value || '');
             } catch (error) {
                 console.error('Reviews load error:', error);
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">Unable to load reviews (network error).</td></tr>';
+                if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">Unable to load reviews (network error).</td></tr>';
             }
         }
 
@@ -787,6 +844,19 @@
             if (isAdmin) {
                 loadDashboard();
             }
+
+            // Wire search inputs (debounced)
+            const userSearch = document.getElementById('search-users');
+            if (userSearch) userSearch.addEventListener('input', debounce((e) => renderUsers(e.target.value)));
+
+            const memberSearch = document.getElementById('search-members');
+            if (memberSearch) memberSearch.addEventListener('input', debounce((e) => renderMembers(e.target.value)));
+
+            const subscriptionSearch = document.getElementById('search-subscriptions');
+            if (subscriptionSearch) subscriptionSearch.addEventListener('input', debounce((e) => renderSubscriptions(e.target.value)));
+
+            const reviewSearch = document.getElementById('search-reviews');
+            if (reviewSearch) reviewSearch.addEventListener('input', debounce((e) => renderReviews(e.target.value)));
         });
     </script>
 </body>
