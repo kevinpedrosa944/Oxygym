@@ -31,7 +31,7 @@ try {
             'Email'     => $row['Email'] ?? '',
             'Phone'     => $row['Phone'] ?? null,
             'Join_Date' => $row['Join_Date'] ?? null,
-            'Status'    => $row['STATUS'] ?? 'Inactive'
+            'STATUS'    => $row['STATUS'] ?? 'Inactive'
         ];
     }
     $stmt->close();

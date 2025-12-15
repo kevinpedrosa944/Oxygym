@@ -7,25 +7,72 @@ $memberId = isset($_GET['member_id']) ? (int)$_GET['member_id'] : 0;
 
 if ($memberId <= 0) {
     http_response_code(400);
-    echo json_encode([]); // Return empty array for invalid ID
+    echo json_encode(['transactions' => [], 'debug' => 'Invalid member ID']);
     exit();
 }
 
 try {
-    $stmt = $conn->prepare("\n        SELECT \n            th.Transaction_Date, \n            th.Amount, \n            mt.Name AS Membership_Name, \n            th.Status\n        FROM Transaction_History th\n        JOIN Membership_Types mt ON th.Membership_ID = mt.Membership_ID\n        WHERE th.Member_ID = ?\n        ORDER BY th.Transaction_Date DESC\n    ");
+    // First check if member exists
+    $memberCheck = $conn->prepare("SELECT Member_ID FROM members WHERE Member_ID = ?");
+    $memberCheck->bind_param("i", $memberId);
+    $memberCheck->execute();
+    $memberExists = $memberCheck->get_result()->num_rows > 0;
+    $memberCheck->close();
+
+    if (!$memberExists) {
+        http_response_code(404);
+        echo json_encode(['transactions' => [], 'debug' => 'Member not found in database']);
+        exit();
+    }
+
+    // Get transaction count
+    $countStmt = $conn->prepare("SELECT COUNT(*) as count FROM transactions WHERE Member_ID = ?");
+    $countStmt->bind_param("i", $memberId);
+    $countStmt->execute();
+    $countResult = $countStmt->get_result()->fetch_assoc();
+    $transactionCount = $countResult['count'];
+    $countStmt->close();
+
+    // Get actual transactions
+    $stmt = $conn->prepare("
+        SELECT 
+            t.Transaction_ID, 
+            t.DATE AS Transaction_Date, 
+            t.Amount, 
+            t.Payment_Method,
+            t.STATUS AS Status
+        FROM transactions t
+        WHERE t.Member_ID = ?
+        ORDER BY t.DATE DESC
+    ");
+    
+    if (!$stmt) {
+        throw new Exception("Prepare failed: " . $conn->error);
+    }
+    
     $stmt->bind_param("i", $memberId);
-    $stmt->execute();
+    
+    if (!$stmt->execute()) {
+        throw new Exception("Execute failed: " . $stmt->error);
+    }
+    
     $result = $stmt->get_result();
     $transactions = $result->fetch_all(MYSQLI_ASSOC);
     $stmt->close();
 
-    echo json_encode($transactions);
+    echo json_encode([
+        'transactions' => $transactions,
+        'count' => $transactionCount,
+        'memberId' => $memberId
+    ]);
 
 } catch (Exception $e) {
     http_response_code(500);
-    // In case of an error, return a JSON object with an error message
-    // This helps the frontend to understand what went wrong.
-    echo json_encode(['error' => 'Database query failed: ' . $e->getMessage()]);
+    echo json_encode([
+        'error' => 'Database query failed: ' . $e->getMessage(),
+        'transactions' => [],
+        'memberId' => $memberId
+    ]);
 }
 
 $conn->close();

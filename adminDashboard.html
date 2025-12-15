@@ -332,6 +332,131 @@
             margin-bottom: 20px;
         }
 
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #3a3a40 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .close-button {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .close-button:hover {
+            color: #ffcc00;
+        }
+
+        #modal-body {
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .member-details-column,
+        .transaction-history-column {
+            flex: 1;
+            min-width: 250px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 15px;
+        }
+
+        .member-details-column h4,
+        .transaction-history-column h4 {
+            color: #1a1a2e;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .member-details-column p {
+            margin: 10px 0;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .member-details-column strong {
+            color: #1a1a2e;
+        }
+
+        .transaction-history-column table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .transaction-history-column table th {
+            background: #f0f0f0;
+            padding: 10px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #ddd;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .transaction-history-column table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .transaction-history-column table tr:hover {
+            background: #f9f9f9;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 70px;
@@ -535,6 +660,19 @@
                     </table>
                 </div>
             </div>
+
+            <!-- Member Details Modal -->
+            <div id="memberDetailsModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Member Details</h3>
+                        <span class="close-button" id="closeModal">&times;</span>
+                    </div>
+                    <div id="modal-body">
+                        <!-- Member details and transaction history will be populated here -->
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -660,20 +798,20 @@
             const q = (filter || '').trim().toLowerCase();
             const list = currentData.members.filter(m => {
                 if (!q) return true;
-                return [String(m.Member_ID), m.First_Name || '', m.Last_Name || '', m.Email || '', m.Phone || '', m.Status || '']
+                return [String(m.Member_ID), m.First_Name || '', m.Last_Name || '', m.Email || '', m.Phone || '', m.STATUS || '']
                     .some(f => String(f).toLowerCase().includes(q));
             });
             tbody.innerHTML = '';
             if (list.length) {
                 list.forEach(member => {
                     tbody.innerHTML += `
-                        <tr>
+                        <tr onclick="openMemberModal(${member.Member_ID})">
                             <td>${member.Member_ID}</td>
                             <td>${member.First_Name} ${member.Last_Name}</td>
                             <td>${member.Email}</td>
                             <td>${member.Phone || 'N/A'}</td>
                             <td>${member.Join_Date || ''}</td>
-                            <td><span class="status-badge status-${(member.Status || '').toLowerCase()}">${member.Status}</span></td>
+                            <td><span class="status-badge status-${(member.STATUS || '').toLowerCase()}">${member.STATUS}</span></td>
                         </tr>
                     `;
                 });
@@ -837,6 +975,96 @@
             msg.textContent = message;
             msg.style.display = 'block';
             setTimeout(() => msg.style.display = 'none', 3000);
+        }
+
+        function openMemberModal(memberId) {
+            const member = currentData.members.find(m => m.Member_ID === memberId);
+            if (!member) return;
+
+            const modal = document.getElementById('memberDetailsModal');
+            const modalBody = document.getElementById('modal-body');
+            
+            modalBody.innerHTML = `
+                <div class="member-details-column">
+                    <h4>Member Information</h4>
+                    <p><strong>Member ID:</strong> ${member.Member_ID}</p>
+                    <p><strong>Name:</strong> ${member.First_Name} ${member.Last_Name}</p>
+                    <p><strong>Email:</strong> ${member.Email}</p>
+                    <p><strong>Phone:</strong> ${member.Phone || 'N/A'}</p>
+                    <p><strong>Join Date:</strong> ${member.Join_Date || ''}</p>
+                    <p><strong>Status:</strong> <span class="status-badge status-${(member.STATUS || '').toLowerCase()}">${member.STATUS}</span></p>
+                </div>
+                <div class="transaction-history-column">
+                    <h4>Transaction History</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Transaction ID</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionHistoryBody">
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #999;">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            modal.style.display = 'block';
+            loadTransactionHistory(memberId);
+
+            // Close button handler
+            const closeBtn = document.getElementById('closeModal');
+            closeBtn.onclick = () => {
+                modal.style.display = 'none';
+            };
+        }
+
+        // Setup modal close on outside click
+        window.addEventListener('click', (event) => {
+            const modal = document.getElementById('memberDetailsModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        async function loadTransactionHistory(memberId) {
+            const tbody = document.getElementById('transactionHistoryBody');
+            if (!tbody) return;
+            
+            try {
+                const response = await fetch(`/Oxygym/api/admin/get_member_transactions.php?member_id=${memberId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                const transactions = data.transactions || [];
+
+                console.log('Transaction Response:', data);
+
+                tbody.innerHTML = '';
+                if (Array.isArray(transactions) && transactions.length > 0) {
+                    transactions.forEach(tx => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${tx.Transaction_ID || 'N/A'}</td>
+                                <td>₱${parseFloat(tx.Amount || 0).toFixed(2)}</td>
+                                <td>${tx.Transaction_Date || 'N/A'}</td>
+                                <td><span class="status-badge status-${(tx.Status || '').toLowerCase()}">${tx.Status || 'N/A'}</span></td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #999;">No transactions found for this member. Member may not have completed any purchases yet.</td></tr>`;
+                }
+            } catch (error) {
+                console.error('Transaction history load error:', error);
+                if (tbody) tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: red;">Error loading transactions: ${error.message}</td></tr>`;
+            }
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
