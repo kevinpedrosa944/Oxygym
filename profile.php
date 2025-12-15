@@ -867,8 +867,6 @@ $conn->close();
             <a href="/Oxygym/pages/subs.php" class="btn btn-primary">
                 <i class="fas fa-sync-alt"></i> Change Plan
             </a>
-            <a href="/Oxygym/pages/subs.php" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Renew Subscription
             </a>
             <a href="#" class="btn btn-danger" onclick="handleLogout(event)">
                 <i class="fas fa-sign-out-alt"></i> Logout
