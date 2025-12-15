@@ -7,33 +7,11 @@ $memberId = isset($_GET['member_id']) ? (int)$_GET['member_id'] : 0;
 
 if ($memberId <= 0) {
     http_response_code(400);
-    echo json_encode(['transactions' => [], 'debug' => 'Invalid member ID']);
+    echo json_encode(['transactions' => []]);
     exit();
 }
 
 try {
-    // First check if member exists
-    $memberCheck = $conn->prepare("SELECT Member_ID FROM members WHERE Member_ID = ?");
-    $memberCheck->bind_param("i", $memberId);
-    $memberCheck->execute();
-    $memberExists = $memberCheck->get_result()->num_rows > 0;
-    $memberCheck->close();
-
-    if (!$memberExists) {
-        http_response_code(404);
-        echo json_encode(['transactions' => [], 'debug' => 'Member not found in database']);
-        exit();
-    }
-
-    // Get transaction count
-    $countStmt = $conn->prepare("SELECT COUNT(*) as count FROM transactions WHERE Member_ID = ?");
-    $countStmt->bind_param("i", $memberId);
-    $countStmt->execute();
-    $countResult = $countStmt->get_result()->fetch_assoc();
-    $transactionCount = $countResult['count'];
-    $countStmt->close();
-
-    // Get actual transactions
     $stmt = $conn->prepare("
         SELECT 
             t.Transaction_ID, 
@@ -60,19 +38,11 @@ try {
     $transactions = $result->fetch_all(MYSQLI_ASSOC);
     $stmt->close();
 
-    echo json_encode([
-        'transactions' => $transactions,
-        'count' => $transactionCount,
-        'memberId' => $memberId
-    ]);
+    echo json_encode(['transactions' => $transactions]);
 
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode([
-        'error' => 'Database query failed: ' . $e->getMessage(),
-        'transactions' => [],
-        'memberId' => $memberId
-    ]);
+    echo json_encode(['transactions' => []]);
 }
 
 $conn->close();
