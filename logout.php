@@ -1,20 +1,22 @@
 <?php
-session_start();
-session_unset();
-session_destroy();
+// filepath: c:\xampp\htdocs\Oxygym\logout.php
 
-// Clear all cookies
-foreach ($_COOKIE as $key => $value) {
-    setcookie($key, '', time() - 3600, '/');
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
-// Prevent browser caching
-header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-header("Cache-Control: post-check=0, pre-check=0", false);
-header("Pragma: no-cache");
-header("Expires: 0");
+// Clear all session variables
+$_SESSION = [];
 
-// Redirect to home
-header("Location: /Oxygym/index.html");
+// Destroy session
+session_destroy();
+
+// Clear cookies
+foreach ($_COOKIE as $name => $value) {
+    setcookie($name, '', time() - 3600, '/');
+}
+
+// Redirect to login
+header('Location: /Oxygym/Login.html');
 exit();
 ?>

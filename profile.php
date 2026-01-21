@@ -3,7 +3,14 @@ session_start();
 include('includes/db_connect.php');
 include('includes/auth.php');
 
-// Get full member details from database
+// If login handler redirected here with ?from=login, forward user to homepage
+if (!empty($_GET['from']) && $_GET['from'] === 'login') {
+    $conn->close();
+    header("Location: /Oxygym/index.html");
+    exit();
+}
+
+// Get member details (without inline subscription join)
 $memberQuery = $conn->prepare("
     SELECT 
         m.Member_ID,
@@ -11,19 +18,12 @@ $memberQuery = $conn->prepare("
         m.Last_Name,
         m.Email,
         m.Phone,
+        m.Address,
         m.Gender,
         m.Birthdate,
-        m.Join_Date,
-        mt.Name as Membership_Name,
-        mt.Price,
-        mt.Duration_Days,
-        sh.Start_Date,
-        sh.End_Date,
-        sh.Status as Subscription_Status
+        m.Join_Date
     FROM Users u
     LEFT JOIN Members m ON u.Member_ID = m.Member_ID
-    LEFT JOIN Subscription_History sh ON m.Member_ID = sh.Member_ID AND sh.Status = 'Active'AND sh.Start_Date <= CURDATE() AND sh.End_Date >= CURDATE()
-    LEFT JOIN Membership_Types mt ON sh.Membership_ID = mt.Membership_ID
     WHERE u.Username = ?
     LIMIT 1
 ");
@@ -46,11 +46,39 @@ if ($result->num_rows === 0) {
 $member = $result->fetch_assoc();
 $memberQuery->close();
 
-// Check if user has active subscription
-if (!$member['Subscription_Status'] || $member['Subscription_Status'] !== 'Active') {
-    $conn->close();
-    header("Location: /Oxygym/pages/subs.php");
-    exit();
+// Fetch latest active subscription for this member (most recent Start_Date)
+$subStmt = $conn->prepare("
+    SELECT sh.Start_Date, sh.End_Date, sh.Status as Subscription_Status,
+           mt.Name as Membership_Name, mt.Price, mt.Duration_Days
+    FROM Subscription_History sh
+    LEFT JOIN Membership_Types mt ON sh.Membership_ID = mt.Membership_ID
+    WHERE sh.Member_ID = ? AND sh.Status = 'Active'
+    ORDER BY sh.Start_Date DESC
+    LIMIT 1
+");
+if ($subStmt) {
+    $subStmt->bind_param("i", $member['Member_ID']);
+    $subStmt->execute();
+    $subRes = $subStmt->get_result();
+    if ($subRes && $subRes->num_rows > 0) {
+        $sub = $subRes->fetch_assoc();
+        // merge subscription fields into $member for existing profile usage
+        $member['Start_Date'] = $sub['Start_Date'];
+        $member['End_Date'] = $sub['End_Date'];
+        $member['Subscription_Status'] = $sub['Subscription_Status'];
+        $member['Membership_Name'] = $sub['Membership_Name'];
+        $member['Price'] = $sub['Price'];
+        $member['Duration_Days'] = $sub['Duration_Days'];
+    } else {
+        // no active subscription found
+        $subStmt->close();
+        $conn->close();
+        header("Location: /Oxygym/pages/subs.php");
+        exit();
+    }
+    $subStmt->close();
+} else {
+    die('Database error: ' . $conn->error);
 }
 
 // Calculate days remaining - with null check
@@ -705,6 +733,12 @@ $conn->close();
                     <span class="detail-label">Phone</span>
                     <span class="detail-value"><?= htmlspecialchars($member['Phone'] ?? 'Not provided') ?></span>
                 </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Address</span>
+                    <span class="detail-value"><?= htmlspecialchars($member['Address'] ?? 'Not provided') ?></span>
+                </div>
+
                 <div class="detail-item">
                     <span class="detail-label">Gender</span>
                     <span class="detail-value"><?= htmlspecialchars($member['Gender'] ?? 'Not specified') ?></span>
@@ -779,7 +813,8 @@ $conn->close();
             <h2><i class="fas fa-star"></i> Your Reviews</h2>
             
             <div class="reviews-container">
-                <button class="btn btn-primary" id="addReviewBtn">
+                <!-- open in-page modal; visual class unchanged -->
+                <button id="openReviewBtn" class="btn btn-primary" type="button">
                     <i class="fas fa-plus"></i> Write a Review
                 </button>
 
@@ -788,13 +823,13 @@ $conn->close();
                 </div>
 
                 <!-- Review Modal -->
-                <div id="reviewModal" class="modal">
+                <div id="reviewModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="reviewModalTitle">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h2>Write a Review</h2>
-                            <button class="close-btn" type="button">&times;</button>
+                            <h2 id="reviewModalTitle">Write a Review</h2>
+                            <button class="close-btn" type="button" aria-label="Close">&times;</button>
                         </div>
-                        <form id="reviewForm" method="POST">
+                        <form id="reviewForm" method="POST" action="/Oxygym/api/review.php" novalidate>
                             <div class="form-group">
                                 <label>Rating</label>
                                 <div class="rating-input">
@@ -832,8 +867,6 @@ $conn->close();
             <a href="/Oxygym/pages/subs.php" class="btn btn-primary">
                 <i class="fas fa-sync-alt"></i> Change Plan
             </a>
-            <a href="/Oxygym/pages/subs.php" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Renew Subscription
             </a>
             <a href="#" class="btn btn-danger" onclick="handleLogout(event)">
                 <i class="fas fa-sign-out-alt"></i> Logout
@@ -845,6 +878,142 @@ $conn->close();
         </div>
 
     </main>
-    <script src="/Oxygym/assets\js\app.js"></script> 
+    <script src="/Oxygym/assets/js/app.js"></script>
+    <script>
+        // modal open/close for review modal (keeps UI behavior)
+        (function() {
+            const openBtn = document.getElementById('openReviewBtn');
+            const modal = document.getElementById('reviewModal');
+            const closeBtn = modal ? modal.querySelector('.close-btn') : null;
+            const cancelBtn = document.getElementById('cancelReviewBtn');
+            const reviewsList = document.getElementById('reviewsList');
+            const reviewForm = document.getElementById('reviewForm');
+
+            function showModal() {
+                if (!modal) return;
+                modal.classList.add('show');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+            }
+            function hideModal() {
+                if (!modal) return;
+                modal.classList.remove('show');
+                modal.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+            }
+
+            if (openBtn) openBtn.addEventListener('click', showModal);
+            if (closeBtn) closeBtn.addEventListener('click', hideModal);
+            if (cancelBtn) cancelBtn.addEventListener('click', hideModal);
+
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) hideModal();
+                });
+            }
+
+            // Fetch and render reviews from API
+            function renderReviews(reviews) {
+                if (!reviewsList) return;
+                if (!reviews || reviews.length === 0) {
+                    reviewsList.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No reviews yet. Be the first to write one.</p>';
+                    return;
+                }
+                reviewsList.innerHTML = reviews.map(function(r) {
+                    var ratingStars = '';
+                    var rating = parseInt(r.rating) || 0;
+                    for (var i = 1; i <= 5; i++) {
+                        ratingStars += '<i class="fas fa-star" style="color:' + (i <= rating ? '#ffc107' : '#444') + ';"></i>';
+                    }
+                    var createdAt = r.created_at ? (new Date(r.created_at)).toLocaleDateString() : '';
+                    return '<div class="review-card">' +
+                                '<div class="review-header">' +
+                                    '<div class="reviewer-info">' +
+                                        '<div class="reviewer-avatar">' + (('<?= htmlspecialchars($member['First_Name'] ?? '') ?>'.charAt(0) || 'U').toUpperCase()) + '</div>' +
+                                        '<div><h4><?= htmlspecialchars($member['First_Name'] ?? 'User') ?></h4><small>' + createdAt + '</small></div>' +
+                                    '</div>' +
+                                    '<div class="review-rating" aria-hidden="true">' + ratingStars + '</div>' +
+                                '</div>' +
+                                '<div class="review-title"><h3>' + escapeHtml(r.title || '') + '</h3></div>' +
+                                '<div class="review-body"><p>' + nl2br(escapeHtml(r.body || '')) + '</p></div>' +
+                                '<div class="review-footer">' + createdAt + '</div>' +
+                            '</div>';
+                }).join('');
+            }
+
+            function nl2br(str) {
+                return (str + '').replace(/\n/g, '<br>');
+            }
+            function escapeHtml(text) {
+                var map = {
+                  '&': '&amp;',
+                  '<': '&lt;',
+                  '>': '&gt;',
+                  '"': '&quot;',
+                  "'": '&#039;'
+                };
+                return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+            }
+
+            function loadReviews() {
+                fetch('/Oxygym/api/review.php', { credentials: 'same-origin' })
+                    .then(function(res) {
+                        if (!res.ok) throw new Error('Network response was not ok');
+                        return res.json();
+                    })
+                    .then(function(data) {
+                        var reviews = [];
+                        if (data && Array.isArray(data.reviews)) reviews = data.reviews;
+                        renderReviews(reviews);
+                    })
+                    .catch(function() {
+                        reviewsList.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">Unable to load reviews.</p>';
+                    });
+            }
+
+            // Submit review via API (POST JSON)
+            if (reviewForm) {
+                reviewForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    var formData = new FormData(reviewForm);
+                    var rating = formData.get('rating') || '';
+                    var title = formData.get('title') || '';
+                    var body = formData.get('body') || '';
+
+                    // Simple validation
+                    if (!rating || !title.trim() || !body.trim()) {
+                        alert('Please provide rating, title and review body.');
+                        return;
+                    }
+
+                    var payload = { rating: rating, title: title.trim(), body: body.trim() };
+
+                    fetch('/Oxygym/api/review.php', {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    })
+                    .then(function(res) {
+                        return res.json().then(function(json) {
+                            if (!res.ok) throw new Error(json.error || 'Failed to post review');
+                            return json;
+                        });
+                    })
+                    .then(function(json) {
+                        hideModal();
+                        reviewForm.reset();
+                        loadReviews();
+                    })
+                    .catch(function(err) {
+                        alert('Error: ' + (err.message || 'Unable to post review'));
+                    });
+                });
+            }
+
+            // initial load
+            loadReviews();
+        })();
+    </script>
 </body>
 </html>

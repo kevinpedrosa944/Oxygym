@@ -1,6 +1,6 @@
 // Check if user is logged in and update button
 function checkLoginStatus() {
-fetch('/Oxygym/api/check_session.php')
+    fetch('/Oxygym/api/check_session.php')
         .then(res => res.json())
         .then(data => {
             const authButtons = document.getElementById('authButtons');
